@@ -1,5 +1,6 @@
 #include "lib.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -16,17 +17,49 @@ WordCounter *init_counter(int size)
 
 void perform_counting(WordCounter *word_counter, char *filename)
 {
-    char *temp_filename = "/tmp/count.XXXXXX";
-    mkstemp(temp_filename);
-    unlink(temp_filename);
+    // Create tmp file
+    char *tmp_filename = "/tmp/count.XXXXXX";
+    mkstemp(tmp_filename);
+    unlink(tmp_filename);
 
+    // Execute wc
     char *arg = "";
     strcpy(arg, "wc ");
     strcat(arg, filename);
     strcat(arg, " > ");
-    strcat(arg, temp_filename);
+    strcat(arg, tmp_filename);
 
     system(arg);
+
+    // Read file
+    FILE *f = fopen(tmp_filename, "rb");
+    long length;
+    char *buffer;
+
+    if (f)
+    {
+        fseek(f, 0L, SEEK_END);
+        length = ftell(f);
+        fseek(f, 0L, SEEK_SET);
+        buffer = malloc(length);
+
+        if (buffer)
+        {
+            fread(buffer, 1, length, f);
+        }
+
+        fclose(f);
+    }
+
+    if (buffer)
+    {
+        word_counter->elements[word_counter->size] = calloc(length, sizeof(char));
+        memmove(word_counter->elements[word_counter->size], buffer, length);
+
+        word_counter->size++;
+
+        remove(tmp_filename);
+    }
 }
 
 int get_element_at(WordCounter *word_counter, int index)
