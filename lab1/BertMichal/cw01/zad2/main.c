@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../zad1/lib.h"
+#include "lib.h"
 
 void perform_action(WordCounter *word_counter, char *command, char *arg1, char *arg2);
 
@@ -46,13 +46,21 @@ void perform_action(WordCounter *word_counter, char *command, char *arg1, char *
 
     if (strcmp(command, "show") == 0)
     {
-        printf("%s", get_element_at(word_counter, atoi(arg1)));
+        char *element = get_element_at(word_counter, atoi(arg1));
+
+        if (element == NULL)
+        {
+            printf("Element not found\n");
+            return;
+        }
+
+        printf("%s\n", element);
         return;
     }
 
-    if (strcmp(command, "delete") == 0)
+    if (strcmp(command, "delete") == 0 && strcmp(arg1, "index") == 0)
     {
-        remove_element_at(word_counter, atoi(arg1));
+        remove_element_at(word_counter, atoi(arg2));
         return;
     }
 
