@@ -1,9 +1,16 @@
 CC = gcc
 CFLAGS = -Wall
 
-testmake:
-	${CC} -c lib.c test.c
-	${CC} -o test lib.o test.o
+lib.o: lib.c
+	${CC} ${CFLAGS} -c lib.c
 
-cleartmp:
-	rm -rf /tmp/count*
+compileStatic: lib.c
+	${CC} ${CFLAGS} -c lib.c
+	ar rcs lib.a lib.o
+
+compileShared: lib.c
+	${CC} ${CFLAGS} -fPIC -c lib.c
+	${CC} ${CFLAGS} -shared -o lib.so lib.o
+
+clean:
+	rm -rf *o
