@@ -10,7 +10,7 @@ typedef struct WordCounter
 
 WordCounter *init_counter(int size);
 void perform_counting(WordCounter *word_counter, char *filename);
-int get_element_at(WordCounter *word_counter, int index);
+char *get_element_at(WordCounter *word_counter, int index);
 void remove_element_at(WordCounter *word_counter, int index);
 void destroy(WordCounter *word_counter);
 

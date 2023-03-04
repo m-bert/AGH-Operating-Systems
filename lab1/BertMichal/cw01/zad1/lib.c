@@ -33,8 +33,6 @@ void perform_counting(WordCounter *word_counter, char *filename)
 
     system(arg);
 
-    printf("%s\n", tmp_filename);
-
     // Read file
     FILE *f = fopen(tmp_filename, "rb");
     long length;
@@ -58,8 +56,8 @@ void perform_counting(WordCounter *word_counter, char *filename)
 
     if (buffer)
     {
-        word_counter->elements[word_counter->size] = calloc(length, sizeof(char));
-        memmove(word_counter->elements[word_counter->size], buffer, length * sizeof(char));
+        word_counter->elements[word_counter->size] = calloc(length - 1, sizeof(char));
+        memmove(word_counter->elements[word_counter->size], buffer, (length - 1) * sizeof(char)); // -1 to remove new line
 
         word_counter->size++;
 
@@ -67,22 +65,37 @@ void perform_counting(WordCounter *word_counter, char *filename)
     }
 }
 
-int get_element_at(WordCounter *word_counter, int index)
+char *get_element_at(WordCounter *word_counter, int index)
 {
-    return 0;
+    if (index >= word_counter->size)
+    {
+        return NULL;
+    }
+
+    return word_counter->elements[index];
 }
 
 void remove_element_at(WordCounter *word_counter, int index)
 {
+    if (index >= word_counter->size)
+    {
+        return;
+    }
+
     free(word_counter->elements[index]);
+    word_counter->elements[index] = NULL;
 }
 
 void destroy(WordCounter *word_counter)
 {
     for (int i = 0; i < word_counter->size; ++i)
     {
-        free(word_counter->elements[i]);
+        if (word_counter->elements[i] != NULL)
+        {
+            free(word_counter->elements[i]);
+        }
     }
 
     free(word_counter);
+    word_counter = NULL;
 }
