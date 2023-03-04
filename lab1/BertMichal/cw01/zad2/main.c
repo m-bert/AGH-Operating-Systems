@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "../zad1/lib.h"
 
 void perform_action(WordCounter *word_counter, char *command, char *arg1, char *arg2);
 
 int main()
 {
-    WordCounter *word_counter;
+    WordCounter *word_counter = malloc(sizeof(WordCounter));
 
     const char delimiter[] = " ";
 
@@ -30,31 +32,33 @@ void perform_action(WordCounter *word_counter, char *command, char *arg1, char *
 {
     if (strcmp(command, "init") == 0)
     {
-        printf("Initializing...\n");
+        free(word_counter);
+        word_counter = init_counter(atoi(arg1));
+
         return;
     }
 
     if (strcmp(command, "count") == 0)
     {
-        printf("Counting words...\n");
+        perform_counting(word_counter, arg1);
         return;
     }
 
     if (strcmp(command, "show") == 0)
     {
-        printf("Show...\n");
+        printf("%s", get_element_at(word_counter, atoi(arg1)));
         return;
     }
 
     if (strcmp(command, "delete") == 0)
     {
-        printf("Deleting...\n");
+        remove_element_at(word_counter, atoi(arg1));
         return;
     }
 
     if (strcmp(command, "destroy") == 0)
     {
-        printf("Destroying...\n");
+        destroy(word_counter);
         return;
     }
 }
