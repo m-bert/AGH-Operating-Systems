@@ -57,7 +57,7 @@ void perform_counting(WordCounter *word_counter, char *filename)
     if (buffer)
     {
         word_counter->elements[word_counter->size] = calloc(length - 1, sizeof(char));
-        memmove(word_counter->elements[word_counter->size], buffer, length * sizeof(char));
+        memmove(word_counter->elements[word_counter->size], buffer, (length - 1) * sizeof(char));
 
         word_counter->size++;
 
