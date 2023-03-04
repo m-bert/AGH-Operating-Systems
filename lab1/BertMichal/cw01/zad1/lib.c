@@ -18,18 +18,22 @@ WordCounter *init_counter(int size)
 void perform_counting(WordCounter *word_counter, char *filename)
 {
     // Create tmp file
-    char *tmp_filename = "/tmp/count.XXXXXX";
+    char tmp_filename[] = "/tmp/count.XXXXXX";
     mkstemp(tmp_filename);
     unlink(tmp_filename);
 
     // Execute wc
-    char *arg = "";
-    strcpy(arg, "wc ");
-    strcat(arg, filename);
-    strcat(arg, " > ");
-    strcat(arg, tmp_filename);
+    char wc[] = "wc";
+    char stream[] = ">";
+
+    unsigned short int bufferSize = strlen(wc) + strlen(filename) + strlen(stream) + strlen(tmp_filename);
+    char arg[bufferSize];
+
+    sprintf(arg, "%s %s %s %s", wc, filename, stream, tmp_filename);
 
     system(arg);
+
+    printf("%s\n", tmp_filename);
 
     // Read file
     FILE *f = fopen(tmp_filename, "rb");
@@ -41,7 +45,8 @@ void perform_counting(WordCounter *word_counter, char *filename)
         fseek(f, 0L, SEEK_END);
         length = ftell(f);
         fseek(f, 0L, SEEK_SET);
-        buffer = malloc(length);
+
+        buffer = malloc(length * sizeof(char));
 
         if (buffer)
         {
@@ -54,7 +59,7 @@ void perform_counting(WordCounter *word_counter, char *filename)
     if (buffer)
     {
         word_counter->elements[word_counter->size] = calloc(length, sizeof(char));
-        memmove(word_counter->elements[word_counter->size], buffer, length);
+        memmove(word_counter->elements[word_counter->size], buffer, length * sizeof(char));
 
         word_counter->size++;
 
