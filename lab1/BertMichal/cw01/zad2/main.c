@@ -8,7 +8,7 @@ void perform_action(WordCounter *word_counter, char *command, char *arg1, char *
 
 int main()
 {
-    WordCounter *word_counter = malloc(sizeof(WordCounter));
+    WordCounter *word_counter = NULL;
 
     const char delimiter[] = " ";
 
@@ -22,51 +22,39 @@ int main()
         char *arg1 = strtok(NULL, delimiter);
         char *arg2 = strtok(NULL, delimiter);
 
-        perform_action(word_counter, command, arg1, arg2);
+        if (strcmp(command, "init") == 0)
+        {
+            word_counter = init_counter(atoi(arg1));
+        }
+
+        if (strcmp(command, "count") == 0)
+        {
+            perform_counting(word_counter, arg1);
+        }
+
+        if (strcmp(command, "show") == 0)
+        {
+            char *element = get_element_at(word_counter, atoi(arg1));
+
+            if (element == NULL)
+            {
+                printf("Element not found\n");
+                continue;
+            }
+
+            printf("%s\n", element);
+        }
+
+        if (strcmp(command, "delete") == 0 && strcmp(arg1, "index") == 0)
+        {
+            remove_element_at(word_counter, atoi(arg2));
+        }
+
+        if (strcmp(command, "destroy") == 0)
+        {
+            destroy(word_counter);
+        }
     }
 
     return 0;
-}
-
-void perform_action(WordCounter *word_counter, char *command, char *arg1, char *arg2)
-{
-    if (strcmp(command, "init") == 0)
-    {
-        free(word_counter);
-        word_counter = init_counter(atoi(arg1));
-
-        return;
-    }
-
-    if (strcmp(command, "count") == 0)
-    {
-        perform_counting(word_counter, arg1);
-        return;
-    }
-
-    if (strcmp(command, "show") == 0)
-    {
-        char *element = get_element_at(word_counter, atoi(arg1));
-
-        if (element == NULL)
-        {
-            printf("Element not found\n");
-            return;
-        }
-
-        printf("%s\n", element);
-        return;
-    }
-
-    if (strcmp(command, "delete") == 0 && strcmp(arg1, "index") == 0)
-    {
-        remove_element_at(word_counter, atoi(arg2));
-        return;
-    }
-
-    if (strcmp(command, "destroy") == 0)
-    {
-        destroy(word_counter);
-        return;
-    }
 }
