@@ -119,7 +119,6 @@ int main(int argc, char **argv)
                 printf(uninitialized_error_message);
                 continue;
             }
-
             real_start = times(&start_time);
             remove_element_at(word_counter, atoi(arg2));
             real_end = times(&end_time);
@@ -161,7 +160,11 @@ void print_time(struct tms start_time, struct tms end_time, clock_t real_start, 
     clock_t user_time = end_time.tms_utime - start_time.tms_utime;
     clock_t system_time = end_time.tms_stime - start_time.tms_stime;
 
-    printf("real_time: %.15lf\n", (double)(real_time * 1000 / sysconf(_SC_CLK_TCK)));
-    printf("user_time: %.15lf\n", (double)(user_time * 1000 / sysconf(_SC_CLK_TCK)));
-    printf("system_time: %.15lf\n", (double)(system_time * 1000 / sysconf(_SC_CLK_TCK)));
+    double real = (double)real_time / (double)sysconf(_SC_CLK_TCK);
+    double usr = (double)user_time / (double)sysconf(_SC_CLK_TCK);
+    double sys = (double)system_time / (double)sysconf(_SC_CLK_TCK);
+
+    // printf("CHUJ %jd, %jd\n", start_time.tms_utime, start_time.tms_cutime);
+
+    printf("Time elapsed | real: %.5f ; user: %.5f ; sys: %.5f\n", real, usr, sys);
 }
