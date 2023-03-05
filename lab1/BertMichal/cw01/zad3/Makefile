@@ -16,5 +16,23 @@ compileDLL: lib.o
 lib.o: lib.c
 	${CC} ${CFLAGS} -c lib.c
 
+testStatic:
+	make clean
+	make compileStatic
+
+	cat test | ./main >> report_static.txt
+
+testShared:
+	make clean
+	make compileShared
+
+	cat test | ./main >> report_shared.txt
+
+testDLL:
+	make clean
+	make compileDLL
+
+	cat test | ./main >> report_DLL.txt
+
 clean:
 	rm -rf *o *a
