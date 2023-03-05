@@ -103,5 +103,4 @@ void destroy(WordCounter *word_counter)
     }
 
     free(word_counter);
-    word_counter = NULL;
 }
