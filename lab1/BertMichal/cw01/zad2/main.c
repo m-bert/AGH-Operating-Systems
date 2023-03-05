@@ -24,16 +24,34 @@ int main()
 
         if (strcmp(command, "init") == 0)
         {
+            if (word_counter != NULL)
+            {
+                printf("Error: word_counter is already initialized!\n");
+                continue;
+            }
+
             word_counter = init_counter(atoi(arg1));
         }
 
         if (strcmp(command, "count") == 0)
         {
+            if (word_counter == NULL)
+            {
+                printf("Error: word_counter not initialized!\n");
+                continue;
+            }
+
             perform_counting(word_counter, arg1);
         }
 
         if (strcmp(command, "show") == 0)
         {
+            if (word_counter == NULL)
+            {
+                printf("Error: word_counter not initialized!\n");
+                continue;
+            }
+
             char *element = get_element_at(word_counter, atoi(arg1));
 
             if (element == NULL)
@@ -47,12 +65,25 @@ int main()
 
         if (strcmp(command, "delete") == 0 && strcmp(arg1, "index") == 0)
         {
+            if (word_counter == NULL)
+            {
+                printf("Error: word_counter not initialized!\n");
+                continue;
+            }
+
             remove_element_at(word_counter, atoi(arg2));
         }
 
         if (strcmp(command, "destroy") == 0)
         {
+            if (word_counter == NULL)
+            {
+                printf("Error: word_counter not initialized!\n");
+                continue;
+            }
+
             destroy(word_counter);
+            word_counter = NULL;
         }
     }
 
