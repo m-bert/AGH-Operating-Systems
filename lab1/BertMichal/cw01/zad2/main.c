@@ -5,6 +5,7 @@
 #include <time.h>
 #include <sys/times.h>
 #include <inttypes.h>
+#include <dlfcn.h>
 
 #include "lib.h"
 
@@ -12,6 +13,22 @@ void print_time(struct tms time_start, struct tms time_end, clock_t real_start, 
 
 int main(int argc, char **argv)
 {
+#ifdef DLL
+    void *handle = dlopen("./liblib.so", RTLD_LAZY);
+
+    WordCounter *(*init_counter)(int) = dlsym(handle, "init_counter");
+    void (*perform_counting)(WordCounter *, char *) = dlsym(handle, "perform_counting");
+    char *(*get_element_at)(WordCounter *, int) = dlsym(handle, "get_element_at");
+    void (*remove_element_at)(WordCounter *, int) = dlsym(handle, "remove_element_at");
+    void (*destroy)(WordCounter *) = dlsym(handle, "destroy");
+
+    if (handle == NULL)
+    {
+        printf("Failed to load liblib.so\n");
+        return -1;
+    }
+#endif
+
     WordCounter *word_counter = NULL;
 
     const char uninitialized_error_message[] = "Error: word_counter not initialized!\n";
@@ -130,6 +147,10 @@ int main(int argc, char **argv)
 
         print_time(start_time, end_time, real_start, real_end);
     }
+
+#ifdef DLL
+    dlclose(handle);
+#endif
 
     return 0;
 }
