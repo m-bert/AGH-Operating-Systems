@@ -1,6 +1,10 @@
 CC = gcc
 CFLAGS = -Wall
 
+all:
+	make compileStatic
+	make compileShared
+
 lib.o: lib.c
 	${CC} ${CFLAGS} -c lib.c
 
@@ -13,4 +17,4 @@ compileShared: lib.c
 	${CC} ${CFLAGS} -shared -o lib.so lib.o
 
 clean:
-	rm -rf *o
+	rm -rf *o *a
