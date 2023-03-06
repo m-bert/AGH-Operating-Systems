@@ -73,9 +73,11 @@ int main(int argc, char **argv)
                 continue;
             }
 
-            real_start = times(&start_time);
+            real_start = clock();
+            times(&start_time);
             word_counter = init_counter(size);
-            real_end = times(&end_time);
+            real_end = clock();
+            times(&end_time);
         }
 
         else if (strcmp(command, "count") == 0)
@@ -86,9 +88,11 @@ int main(int argc, char **argv)
                 continue;
             }
 
-            real_start = times(&start_time);
+            real_start = clock();
+            times(&start_time);
             perform_counting(word_counter, arg1);
-            real_end = times(&end_time);
+            real_end = clock();
+            times(&end_time);
         }
 
         else if (strcmp(command, "show") == 0)
@@ -99,7 +103,8 @@ int main(int argc, char **argv)
                 continue;
             }
 
-            real_start = times(&start_time);
+            real_start = clock();
+            times(&start_time);
             char *element = get_element_at(word_counter, atoi(arg1));
 
             if (element == NULL)
@@ -109,7 +114,8 @@ int main(int argc, char **argv)
             }
 
             printf("%s\n", element);
-            real_end = times(&end_time);
+            real_end = clock();
+            times(&end_time);
         }
 
         else if (strcmp(command, "delete") == 0 && strcmp(arg1, "index") == 0)
@@ -119,9 +125,11 @@ int main(int argc, char **argv)
                 printf(uninitialized_error_message);
                 continue;
             }
-            real_start = times(&start_time);
+            real_start = clock();
+            times(&start_time);
             remove_element_at(word_counter, atoi(arg2));
-            real_end = times(&end_time);
+            real_end = clock();
+            times(&end_time);
         }
 
         else if (strcmp(command, "destroy") == 0)
@@ -132,10 +140,12 @@ int main(int argc, char **argv)
                 continue;
             }
 
-            real_start = times(&start_time);
+            real_start = clock();
+            times(&start_time);
             destroy(word_counter);
             word_counter = NULL;
-            real_end = times(&end_time);
+            real_end = clock();
+            times(&end_time);
         }
 
         else
@@ -144,6 +154,7 @@ int main(int argc, char **argv)
             continue;
         }
 
+        printf("%s [%s %s] | ", command, arg1, arg2);
         print_time(start_time, end_time, real_start, real_end);
     }
 
@@ -160,11 +171,9 @@ void print_time(struct tms start_time, struct tms end_time, clock_t real_start, 
     clock_t user_time = end_time.tms_utime - start_time.tms_utime;
     clock_t system_time = end_time.tms_stime - start_time.tms_stime;
 
-    double real = (double)real_time / (double)sysconf(_SC_CLK_TCK);
+    double real = (double)real_time / (double)CLOCKS_PER_SEC * 1000;
     double usr = (double)user_time / (double)sysconf(_SC_CLK_TCK);
     double sys = (double)system_time / (double)sysconf(_SC_CLK_TCK);
 
-    // printf("CHUJ %jd, %jd\n", start_time.tms_utime, start_time.tms_cutime);
-
-    printf("Time elapsed | real: %.5f ; user: %.5f ; sys: %.5f\n", real, usr, sys);
+    printf("real: %.5fms ; user: %.5f ; sys: %.5f\n", real, usr, sys);
 }
