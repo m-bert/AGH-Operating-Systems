@@ -1,7 +1,7 @@
 init 3
 count lib.c
 count lib.h
-count Tadeusz
+count main.c
 show 0
 show 1
 show 2
