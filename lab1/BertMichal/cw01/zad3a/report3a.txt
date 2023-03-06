@@ -63,3 +63,8 @@ delete [index 3]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
 delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
 destroy [(null) (null)] | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
 ==========================================================================================================
+
+Z pomiaru czasów wynika, że czasy użytkownika oraz systemowe są zbyt małe aby zostały zarejestrowane. 
+W przypadku czasu rzeczywistego widzimy natomiast różnicę. Najlepiej wypada biblioteka współdzielona, która pomimo dużego czasu
+inicjalizacji cechuje się szybkim przeprowadzaniem procedury zliczania. 
+Na drugim miejscu można umieścić bibliotekę ładowaną dynamicznie, najwolniej natomiast zadziałała biblioteka ładowana statycznie.

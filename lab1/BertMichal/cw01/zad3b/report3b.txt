@@ -208,3 +208,14 @@ delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
 destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
 ----------------------------------------------------------------------------------------------------------
 ==========================================================================================================
+
+
+Ciekawą cechą otrzymanych wyników jest fakt, że poziomy optymalizacji nie zmieniają znacząco czasu działania programu w przypadku
+biblioteki statycznej - otrzymane czasy są podobne na wszystkich poziomach optymalizacji.
+
+W przypadku biblioteki współdzielonej oraz ładowanej dynamicznie, użycie flagi -O0 skutkuje spowolnieniem działania programu.
+
+O ile poziom -O0 nie różni się znacząco w przypadku biblioteki współdzielonej, o tyle w przypadku biblioteki dynamicznej widać
+znaczące różnice między tymi poziomami.
+
+Biblioteki skompilowane z flagą -O1 cechowały się najszybszym działaniem.
