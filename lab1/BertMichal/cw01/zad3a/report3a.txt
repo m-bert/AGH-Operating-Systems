@@ -1,0 +1,65 @@
+==========================================================================================================
+Static Library:
+
+init [5 (null)]         | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.24100ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.20600ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.16700ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.15900ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.16500ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output:  105  216 2344 lib.c
+show [1 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output:  16  38 418 lib.h
+show [2 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output:  178  433 4931 main.c 
+show [3 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output:  17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output:  50 130 895 Makefile
+delete [index 0]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+==========================================================================================================
+
+==========================================================================================================
+Shared Library:
+
+init [5 (null)]         | real: 0.00700ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.17300ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.11800ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.13200ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.13300ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.13700ms ; user: 0.00000 ; sys: 0.00000 
+show [0 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 50 130 895 Makefile
+delete [index 0]        | real: 0.00300ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+==========================================================================================================
+
+==========================================================================================================
+Dynamic Linked Library:
+
+init [5 (null)]         | real: 0.00300ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.18900ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.15500ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.18200ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.14300ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.12400ms ; user: 0.00000 ; sys: 0.00000 
+show [0 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 6  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 50 130 895 Makefile
+delete [index 0]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+==========================================================================================================
