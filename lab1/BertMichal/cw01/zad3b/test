@@ -1,0 +1,17 @@
+init 5
+count lib.c
+count lib.h
+count main.c
+count test
+count Makefile
+show 0
+show 1
+show 2
+show 3
+show 4
+delete index 0
+delete index 1
+delete index 2
+delete index 3
+delete index 4
+destroy
