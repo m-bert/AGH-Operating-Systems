@@ -1,0 +1,210 @@
+==========================================================================================================
+Static Library:
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -O0
+
+init [5 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.15900ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.11200ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.11200ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.13600ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.11600ms ; user: 0.00000 ; sys: 0.00000 
+show [0 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -O1
+
+init [5 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.16500ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.12500ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.13000ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.13300ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.11700ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -Os
+
+init [5 (null)]         | real: 0.00300ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.19000ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.13800ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.14900ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.14600ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.14200ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+
+----------------------------------------------------------------------------------------------------------
+==========================================================================================================
+
+==========================================================================================================
+Shared Library:
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -O0
+
+init [5 (null)]         | real: 0.00500ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.29800ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.21800ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.23200ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.25500ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.23900ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00500ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -O1
+
+init [5 (null)]         | real: 0.00300ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.19400ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.10100ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.09700ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.10000ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.11400ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00500ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -Os
+
+init [5 (null)]         | real: 0.00500ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.23100ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.17000ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.15700ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.14800ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.18200ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00600ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+==========================================================================================================
+
+==========================================================================================================
+Dynamic Linked Library:
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -O0
+
+init [5 (null)]         | real: 0.00700ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.43700ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.31900ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.34400ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.34200ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.25100ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00500ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -O1
+
+init [5 (null)]         | real: 0.00300ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.17400ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.13500ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.12900ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.12800ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.15500ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00000ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+Optimization: -Os
+
+init [5 (null)]         | real: 0.00300ms ; user: 0.00000 ; sys: 0.00000
+count [lib.c (null)]    | real: 0.26400ms ; user: 0.00000 ; sys: 0.00000
+count [lib.h (null)]    | real: 0.20200ms ; user: 0.00000 ; sys: 0.00000
+count [main.c (null)]   | real: 0.20600ms ; user: 0.00000 ; sys: 0.00000
+count [test (null)]     | real: 0.19500ms ; user: 0.00000 ; sys: 0.00000
+count [Makefile (null)] | real: 0.17100ms ; user: 0.00000 ; sys: 0.00000
+show [0 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 105  216 2344 lib.c
+show [1 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 16  38 418 lib.h
+show [2 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 178  433 4931 main.c
+show [3 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 17  38 188 test
+show [4 (null)]         | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000 | output: 77  202 1456 Makefile
+delete [index 0]        | real: 0.00200ms ; user: 0.00000 ; sys: 0.00000
+delete [index 1]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 2]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 3]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+delete [index 4]        | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+destroy [(null) (null)] | real: 0.00100ms ; user: 0.00000 ; sys: 0.00000
+----------------------------------------------------------------------------------------------------------
+==========================================================================================================
