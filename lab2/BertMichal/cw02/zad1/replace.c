@@ -44,7 +44,7 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
         return false;
     }
 
-    // Create output file
+    // Create output file (if doesn't exist already)
     int output_fd = open(output_path, O_WRONLY | O_CREAT | O_EXCL);
 
     if (output_fd == -1)
@@ -52,6 +52,29 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
         printf("Failed to create (file may already exist)\n");
         return false;
     }
+
+    chmod(output_path, S_IRUSR | S_IWUSR | S_IROTH | S_IWOTH);
+
+    char *buffer = malloc(sizeof(char));
+
+    while (read(input_fd, buffer, sizeof(char)) == 1)
+    {
+        if (*buffer == to_replace)
+        {
+            char *tmp_buffer = malloc(sizeof(char));
+            *tmp_buffer = to_replace_with;
+
+            write(output_fd, tmp_buffer, sizeof(char));
+        }
+        else
+        {
+            write(output_fd, buffer, sizeof(char));
+        }
+    }
+
+    // Close files
+    close(input_fd);
+    close(output_fd);
 
     return true;
 }
