@@ -10,4 +10,4 @@ replace.o: replace.c
 	${CC} ${CFLAGS} replace.c -c 
 
 clean:
-	rm -rf *o *a
+	rm -rf *o *a res.txt
