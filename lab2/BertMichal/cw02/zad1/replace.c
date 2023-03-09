@@ -47,6 +47,7 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
 
     if (output_fd == -1)
     {
+        close(input_fd);
         printf("Failed to create output file\n");
         return false;
     }
@@ -92,6 +93,7 @@ bool replace_C_lib(const char to_replace, const char to_replace_with, const char
 
     if (!output_file)
     {
+        fclose(input_file);
         printf("Failed to create output file\n");
         return false;
     }
