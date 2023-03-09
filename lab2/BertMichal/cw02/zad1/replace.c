@@ -113,6 +113,8 @@ bool replace_C_lib(const char to_replace, const char to_replace_with, const char
         }
     }
 
+    free(buffer);
+
     fclose(input_file);
     fclose(output_file);
 
