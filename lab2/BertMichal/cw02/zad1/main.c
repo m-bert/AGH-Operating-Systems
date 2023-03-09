@@ -16,9 +16,15 @@ int main(int argc, char *argv[])
     const char *input_path = argv[3];
     const char *output_path = argv[4];
 
-    bool system_replace_status = replace_system_lib(to_replace, to_replace_with, input_path, output_path);
+    if (!replace_system_lib(to_replace, to_replace_with, input_path, output_path))
+    {
+        return -1;
+    }
 
-    printf("%d", system_replace_status);
+    if (!replace_C_lib(to_replace, to_replace_with, input_path, output_path))
+    {
+        return -1;
+    }
 
     return 0;
 }

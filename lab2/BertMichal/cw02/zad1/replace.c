@@ -35,7 +35,6 @@ bool validate_parameters(int argc, char *argv[])
 
 bool replace_system_lib(const char to_replace, const char to_replace_with, const char *input_path, const char *output_path)
 {
-    // Open input file
     int input_fd = open(input_path, O_RDONLY);
 
     if (input_fd == -1)
@@ -44,12 +43,11 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
         return false;
     }
 
-    // Create output file (if doesn't exist already)
-    int output_fd = open(output_path, O_WRONLY | O_CREAT | O_EXCL);
+    int output_fd = open(output_path, O_WRONLY | O_CREAT);
 
     if (output_fd == -1)
     {
-        printf("Failed to create (file may already exist)\n");
+        printf("Failed to create output file\n");
         return false;
     }
 
@@ -57,7 +55,7 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
 
     char *buffer = malloc(sizeof(char));
 
-    while (read(input_fd, buffer, sizeof(char)) == 1)
+    while (read(input_fd, buffer, sizeof(char)) != 0)
     {
         if (*buffer == to_replace)
         {
@@ -72,7 +70,8 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
         }
     }
 
-    // Close files
+    free(buffer);
+
     close(input_fd);
     close(output_fd);
 
@@ -81,5 +80,41 @@ bool replace_system_lib(const char to_replace, const char to_replace_with, const
 
 bool replace_C_lib(const char to_replace, const char to_replace_with, const char *input_path, const char *output_path)
 {
+    FILE *input_file = fopen(input_path, "r");
+
+    if (!input_file)
+    {
+        printf("Failed to open file\n");
+        return false;
+    }
+
+    FILE *output_file = fopen(output_path, "w");
+
+    if (!output_file)
+    {
+        printf("Failed to create output file\n");
+        return false;
+    }
+
+    char *buffer = malloc(sizeof(char));
+
+    while (fread(buffer, sizeof(char), sizeof(char), input_file) != 0)
+    {
+        if (*buffer == to_replace)
+        {
+            char *tmp_buffer = malloc(sizeof(char));
+            *tmp_buffer = to_replace_with;
+
+            fwrite(tmp_buffer, sizeof(char), sizeof(char), output_file);
+        }
+        else
+        {
+            fwrite(buffer, sizeof(char), sizeof(char), output_file);
+        }
+    }
+
+    fclose(input_file);
+    fclose(output_file);
+
     return true;
 }
