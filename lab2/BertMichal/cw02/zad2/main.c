@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[])
 {
-    reverse_by_byte(argv[1]);
+    reverse_file(argv[1], 1);
 
     return 0;
 }

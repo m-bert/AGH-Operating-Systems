@@ -34,8 +34,33 @@ bool reverse_file(const char *input_path, const int block_size)
         return false;
     }
 
+    char *buffer = malloc(sizeof(char) * block_size);
+
+    // Go to end of file
+    fseek(input_file, -block_size * sizeof(char), SEEK_END);
+
+    // This loops runs while we can read whole block of data
+    while (ftell(input_file) >= block_size)
+    {
+        fread(buffer, sizeof(char), block_size * sizeof(char), input_file);
+        reverse_str(buffer);
+        fwrite(buffer, sizeof(char), block_size * sizeof(char), output_file);
+        fseek(input_file, -2 * block_size * sizeof(char), SEEK_CUR);
+    }
+
+    // Since while loop reads only full blocks, we have to read remaing part of the file
+    // which length doesn't have to be a multiple of block_size
+    unsigned int remaining_bytes = ftell(input_file) + 1;
+
+    fseek(input_file, 0, SEEK_SET);
+    fread(buffer, sizeof(char), remaining_bytes * sizeof(char), input_file);
+    reverse_str(buffer);
+    fwrite(buffer, sizeof(char), block_size * sizeof(char), output_file);
+
     fclose(input_file);
     fclose(output_file);
+
+    return true;
 }
 
 void reverse_str(char *str)
