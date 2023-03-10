@@ -4,36 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <time.h>
 
-bool reverse_file(const char *input_path, const int block_size)
+bool reverse_file(const char *input_path, const int block_size, FILE *input_file, FILE *output_file)
 {
-    FILE *input_file = fopen(input_path, "r");
-
-    if (!input_file)
-    {
-        printf("Failed to open input file\n");
-        return false;
-    }
-
-    const char *prefix = "rev_";
-    const unsigned int output_path_len = strlen(input_path) + strlen(prefix);
-    char output_path[output_path_len];
-    sprintf(output_path, "%s%s", prefix, input_path);
-
-    FILE *output_file = fopen(output_path, "w");
-
-    if (!output_file)
-    {
-        printf("Failed to create output file\n");
-
-        fclose(input_file);
-        return false;
-    }
 
     char *buffer = malloc(sizeof(char) * block_size);
 
@@ -60,9 +34,6 @@ bool reverse_file(const char *input_path, const int block_size)
 
     free(buffer);
 
-    fclose(input_file);
-    fclose(output_file);
-
     return true;
 }
 
@@ -79,10 +50,10 @@ void reverse_str(char *str)
     }
 }
 
-bool perform_test(const char *input_path, const int block_size)
+bool perform_test(const char *input_path, const int block_size, FILE *input_file, FILE *output_file)
 {
     clock_t block_start_time = clock();
-    bool reverse_by_block_succeed = reverse_file(input_path, block_size);
+    const bool reverse_by_block_succeed = reverse_file(input_path, block_size, input_file, output_file);
     clock_t block_end_time = clock();
 
     if (!reverse_by_block_succeed)
