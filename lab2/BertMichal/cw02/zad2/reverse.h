@@ -5,5 +5,6 @@
 
 bool reverse_file(const char *input_path, const int block_size);
 void reverse_str(char *str);
+bool perform_test(const char *input_path, const int block_size);
 
 #endif

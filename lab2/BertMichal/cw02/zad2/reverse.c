@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 
 bool reverse_file(const char *input_path, const int block_size)
 {
@@ -57,6 +58,8 @@ bool reverse_file(const char *input_path, const int block_size)
     reverse_str(buffer);
     fwrite(buffer, sizeof(char), block_size * sizeof(char), output_file);
 
+    free(buffer);
+
     fclose(input_file);
     fclose(output_file);
 
@@ -74,4 +77,23 @@ void reverse_str(char *str)
         str[i] = str[n - i - 1];
         str[n - i - 1] = tmp;
     }
+}
+
+bool perform_test(const char *input_path, const int block_size)
+{
+    clock_t block_start_time = clock();
+    bool reverse_by_block_succeed = reverse_file(input_path, block_size);
+    clock_t block_end_time = clock();
+
+    if (!reverse_by_block_succeed)
+    {
+        return false;
+    }
+
+    clock_t block_total_time = block_end_time - block_start_time;
+    double block_total_ms = block_total_time / (double)CLOCKS_PER_SEC * 1000;
+
+    printf("Reversed file with with block_size = %d in %.5f ms\n", block_size, block_total_ms);
+
+    return true;
 }
