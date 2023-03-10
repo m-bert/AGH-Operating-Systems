@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         printf("Failed to create output file\n");
 
         fclose(input_file);
-        return false;
+        return -1;
     }
 
     const bool result_1 = perform_test(input_path, 1, input_file, output_file);
