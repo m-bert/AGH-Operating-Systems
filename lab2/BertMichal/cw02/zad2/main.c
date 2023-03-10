@@ -8,13 +8,16 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        printf("Too few arguments (maybe you forgot input path)\n");
+        printf("Too few arguments. Usage:\n");
+        printf("./main <filename> <block_size>\n");
+
         return -1;
     }
 
     const char *input_path = argv[1];
+    const int block_size = atoi(argv[2]);
 
     FILE *input_file = fopen(input_path, "r");
 
@@ -39,16 +42,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    const bool result_1 = perform_test(input_path, 1, input_file, output_file);
+    const bool result = perform_test(input_path, block_size, input_file, output_file);
 
-    if (!result_1)
-    {
-        return -1;
-    }
-
-    const bool result_1024 = perform_test(input_path, 1024, input_file, output_file);
-
-    if (!result_1024)
+    if (!result)
     {
         return -1;
     }

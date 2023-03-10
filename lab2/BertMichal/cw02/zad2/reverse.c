@@ -11,24 +11,48 @@ bool reverse_file(const char *input_path, const int block_size, FILE *input_file
     char *buffer = malloc(sizeof(char) * block_size);
 
     // Go to end of file
+    int current_position = 0;
     fseek(input_file, -block_size * sizeof(char), SEEK_END);
 
     // This loops runs while we can read whole block of data
-    while (ftell(input_file) >= block_size)
+    while (ftell(input_file) != current_position)
     {
+        current_position = ftell(input_file);
+
         fread(buffer, sizeof(char), block_size * sizeof(char), input_file);
         reverse_str(buffer);
         fwrite(buffer, sizeof(char), block_size * sizeof(char), output_file);
-        fseek(input_file, -2 * block_size * sizeof(char), SEEK_CUR);
+
+        fseek(input_file, -block_size * sizeof(char), SEEK_CUR); // Returns to current_position
+        fseek(input_file, -block_size * sizeof(char), SEEK_CUR);
     }
 
     // Since while loop reads only full blocks, we have to read remaing part of the file
     // which length doesn't have to be a multiple of block_size
-    unsigned int remaining_bytes = ftell(input_file) + 1;
+    int remaining_bytes = ftell(input_file);
     fseek(input_file, 0, SEEK_SET);
-    fread(buffer, sizeof(char), remaining_bytes * sizeof(char), input_file);
-    reverse_str(buffer);
-    fwrite(buffer, sizeof(char), block_size * sizeof(char), output_file);
+
+    if (block_size == 1)
+    {
+        free(buffer);
+        return true;
+    }
+
+    if (remaining_bytes == 0)
+    {
+        remaining_bytes = fread(buffer, sizeof(char), block_size * sizeof(char), input_file);
+        reverse_str(buffer);
+        fwrite(buffer, sizeof(char), remaining_bytes * sizeof(char), output_file);
+    }
+    else
+    {
+        char *tmp_buffer = malloc(sizeof(char) * remaining_bytes);
+        fread(tmp_buffer, sizeof(char), remaining_bytes * sizeof(char), input_file);
+        reverse_str(tmp_buffer);
+        fwrite(tmp_buffer, sizeof(char), remaining_bytes * sizeof(char), output_file);
+
+        free(tmp_buffer);
+    }
 
     free(buffer);
 
@@ -40,7 +64,7 @@ void reverse_str(char *str)
     const unsigned int n = strlen(str);
     char tmp;
 
-    for (int i = 0; i <= n / 2; ++i)
+    for (int i = 0; i < n / 2; ++i)
     {
         tmp = str[i];
         str[i] = str[n - i - 1];
