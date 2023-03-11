@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     DIR *dir = opendir("./");
 
-    if (dir == NULL)
+    if (!dir)
     {
         printf("Couldn't open current directory\n");
         return -1;
