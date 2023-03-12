@@ -19,6 +19,13 @@ int main(int argc, char *argv[])
     const char *input_path = argv[1];
     const int block_size = atoi(argv[2]);
 
+    if (block_size <= 0)
+    {
+        printf("Block size has to be positive integer\n");
+
+        return -1;
+    }
+
     FILE *input_file = fopen(input_path, "r");
 
     if (!input_file)
