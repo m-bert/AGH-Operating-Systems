@@ -1,0 +1,11 @@
+=======================================================
+Odwrócenie pliku lipsum.txt (8204 bajty)
+
+Rozmiar bloku = 1           | 2.75600ms
+Rozmiar bloku = 1024        | 0.06800ms
+
+Uruchomienie testu: make selfTest BLOCKS={block_size}
+np.: make selfTest BLOCKS=1024
+
+Domyślny block_size ustawiony jest na 1
+=======================================================
