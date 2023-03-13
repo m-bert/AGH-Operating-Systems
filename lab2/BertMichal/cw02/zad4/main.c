@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 
     const char *dir_name = argv[1];
 
-    if (ftw(dir_name, traverse_functions, 10) != 0)
+    if (ftw(dir_name, traverse_functions, sysconf(FOPEN_MAX)) != 0)
     {
         printf("Traversing failed\n");
         return -1;
