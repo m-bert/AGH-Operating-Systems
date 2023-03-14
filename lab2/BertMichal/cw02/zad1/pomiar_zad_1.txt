@@ -1,0 +1,18 @@
+=============================================
+Zamiana znaku w lorem ipsum:
+
+Biblioteka systemowa:   3.04900ms
+Biblioteka C:           0.13400ms
+
+Uruchomienie testu: make lipsum_test
+=============================================
+
+=============================================
+Zamiana znaku w przypadku pesymistycznym
+(Znak występujący 1024 razy zamieniony na b)
+
+Biblioteka systemowa:   3.60500ms
+Biblioteka C:           0.12200ms
+
+Uruchomienie testu: make worst_case_test
+=============================================
