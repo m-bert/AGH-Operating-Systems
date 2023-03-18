@@ -3,6 +3,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MAX_PATTERN_LENGTH 255
 
@@ -26,6 +28,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    printf("PID: %d\n", getpid());
     read_dir(starting_dir, pattern, pattern_length);
 
     return 0;
@@ -38,6 +41,7 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
 
     struct stat st;
     struct dirent *dir_entry;
+    char *buffer = malloc(sizeof(char) * pattern_length);
 
     while ((dir_entry = readdir(dir)) != NULL)
     {
@@ -48,31 +52,46 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
         }
 
         const unsigned int current_path_length = strlen(dir_entry->d_name) + strlen(path) + 1;
-        char current_path[current_path_length];
+        char *current_path = malloc(sizeof(char) * current_path_length);
         sprintf(current_path, "%s/%s", path, dir_entry->d_name);
 
         stat(current_path, &st);
 
         if (S_ISDIR(st.st_mode))
         {
-            read_dir(current_path, pattern, pattern_length);
-            continue;
+            pid_t new_process_pid = fork();
+
+            switch (new_process_pid)
+            {
+            case -1: // Fork failed
+                break;
+
+            case 0: // In child process
+                read_dir(current_path, pattern, pattern_length);
+
+                free(buffer);
+                free(current_path);
+                return;
+
+            default: // In parent process
+                free(current_path);
+                continue;
+            }
         }
 
         FILE *f = fopen(current_path, "r");
-        char *buffer = malloc(sizeof(char) * pattern_length);
         fread(buffer, sizeof(char), pattern_length, f);
         fclose(f);
 
-        printf("BUFFER %s\n", buffer);
-
         if (strcmp(buffer, pattern) == 0)
         {
-            printf("HAS: %s\n", current_path);
+            printf("HAS: %s, %d from[%d]\n", current_path, getpid(), getppid());
         }
 
-        free(buffer);
+        free(current_path);
     }
+
+    free(buffer);
 
     closedir(dir);
     return;
