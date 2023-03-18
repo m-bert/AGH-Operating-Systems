@@ -5,10 +5,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <sys/wait.h>
 
 #define MAX_PATTERN_LENGTH 255
 
-void read_dir(const char *path, const char *pattern, const int pattern_length);
+bool read_dir(const char *path, const char *pattern, const int pattern_length);
 
 int main(int argc, char *argv[])
 {
@@ -28,20 +30,35 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("PID: %d\n", getpid());
-    read_dir(starting_dir, pattern, pattern_length);
+    if (!read_dir(starting_dir, pattern, pattern_length))
+    {
+        return -1;
+    }
 
     return 0;
 }
 
-void read_dir(const char *path, const char *pattern, const int pattern_length)
+bool read_dir(const char *path, const char *pattern, const int pattern_length)
 {
 
     DIR *dir = opendir(path);
 
+    if (!dir)
+    {
+        return false;
+    }
+
     struct stat st;
     struct dirent *dir_entry;
-    char *buffer = malloc(sizeof(char) * pattern_length);
+    char *buffer = malloc(sizeof(char) * (pattern_length + 1));
+
+    if (!buffer)
+    {
+        perror("Failed to allocate memory\n");
+
+        closedir(dir);
+        return false;
+    }
 
     while ((dir_entry = readdir(dir)) != NULL)
     {
@@ -52,10 +69,22 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
         }
 
         const unsigned int current_path_length = strlen(dir_entry->d_name) + strlen(path) + 1;
-        char *current_path = malloc(sizeof(char) * current_path_length);
+        char *current_path = malloc(sizeof(char) * (current_path_length + 1));
+
+        if (!current_path)
+        {
+            perror("Failed to allocate memory\n");
+
+            free(buffer);
+            return false;
+        }
+
         sprintf(current_path, "%s/%s", path, dir_entry->d_name);
 
-        stat(current_path, &st);
+        if (stat(current_path, &st) == -1)
+        {
+            return false;
+        }
 
         if (S_ISDIR(st.st_mode))
         {
@@ -64,14 +93,20 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
             switch (new_process_pid)
             {
             case -1: // Fork failed
-                break;
+                perror("Fork failed\n");
+                free(buffer);
+                free(current_path);
+                closedir(dir);
+                return false;
 
             case 0: // In child process
-                read_dir(current_path, pattern, pattern_length);
+                bool return_value = read_dir(current_path, pattern, pattern_length);
 
                 free(buffer);
                 free(current_path);
-                return;
+
+                closedir(dir);
+                return return_value;
 
             default: // In parent process
                 free(current_path);
@@ -80,12 +115,22 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
         }
 
         FILE *f = fopen(current_path, "r");
+
+        if (!f)
+        {
+            free(buffer);
+            free(current_path);
+            closedir(dir);
+            return false;
+        }
+
         fread(buffer, sizeof(char), pattern_length, f);
+
         fclose(f);
 
         if (strcmp(buffer, pattern) == 0)
         {
-            printf("HAS: %s, %d from[%d]\n", current_path, getpid(), getppid());
+            printf("%s\n", current_path);
         }
 
         free(current_path);
@@ -94,5 +139,6 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
     free(buffer);
 
     closedir(dir);
-    return;
+
+    return true;
 }
