@@ -10,7 +10,7 @@
 
 #define MAX_PATTERN_LENGTH 255
 
-bool read_dir(const char *path, const char *pattern, const int pattern_length);
+void read_dir(const char *path, const char *pattern, const int pattern_length);
 
 int main(int argc, char *argv[])
 {
@@ -30,22 +30,20 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    if (!read_dir(starting_dir, pattern, pattern_length))
-    {
-        return -1;
-    }
+    read_dir(starting_dir, pattern, pattern_length);
 
     return 0;
 }
 
-bool read_dir(const char *path, const char *pattern, const int pattern_length)
+void read_dir(const char *path, const char *pattern, const int pattern_length)
 {
 
     DIR *dir = opendir(path);
 
     if (!dir)
     {
-        return false;
+        perror("Failed to open directory\n");
+        return;
     }
 
     struct stat st;
@@ -57,7 +55,7 @@ bool read_dir(const char *path, const char *pattern, const int pattern_length)
         perror("Failed to allocate memory\n");
 
         closedir(dir);
-        return false;
+        return;
     }
 
     while ((dir_entry = readdir(dir)) != NULL)
@@ -76,14 +74,14 @@ bool read_dir(const char *path, const char *pattern, const int pattern_length)
             perror("Failed to allocate memory\n");
 
             free(buffer);
-            return false;
+            return;
         }
 
         sprintf(current_path, "%s/%s", path, dir_entry->d_name);
 
         if (stat(current_path, &st) == -1)
         {
-            return false;
+            return;
         }
 
         if (S_ISDIR(st.st_mode))
@@ -97,16 +95,16 @@ bool read_dir(const char *path, const char *pattern, const int pattern_length)
                 free(buffer);
                 free(current_path);
                 closedir(dir);
-                return false;
+                return;
 
             case 0: // In child process
-                bool return_value = read_dir(current_path, pattern, pattern_length);
+                read_dir(current_path, pattern, pattern_length);
 
                 free(buffer);
                 free(current_path);
 
                 closedir(dir);
-                return return_value;
+                return;
 
             default: // In parent process
                 free(current_path);
@@ -121,7 +119,7 @@ bool read_dir(const char *path, const char *pattern, const int pattern_length)
             free(buffer);
             free(current_path);
             closedir(dir);
-            return false;
+            return;
         }
 
         fread(buffer, sizeof(char), pattern_length, f);
@@ -140,5 +138,8 @@ bool read_dir(const char *path, const char *pattern, const int pattern_length)
 
     closedir(dir);
 
-    return true;
+    // while (wait(NULL) > 0)
+    //     ;
+
+    return;
 }
