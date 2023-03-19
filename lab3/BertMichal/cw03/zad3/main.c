@@ -48,21 +48,23 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
 
     struct stat st;
     struct dirent *dir_entry;
-    char *buffer = malloc(sizeof(char) * (pattern_length + 1));
-
-    if (!buffer)
-    {
-        perror("Failed to allocate memory\n");
-
-        closedir(dir);
-        return;
-    }
 
     while ((dir_entry = readdir(dir)) != NULL)
     {
+        char *buffer = calloc(sizeof(char), (pattern_length + 1));
+
+        if (!buffer)
+        {
+            perror("Failed to allocate memory\n");
+
+            closedir(dir);
+            return;
+        }
+
         // Avoid traversing . and ..
         if (strcmp(dir_entry->d_name, ".") == 0 || strcmp(dir_entry->d_name, "..") == 0)
         {
+            free(buffer);
             continue;
         }
 
@@ -74,6 +76,7 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
             perror("Failed to allocate memory\n");
 
             free(buffer);
+            closedir(dir);
             return;
         }
 
@@ -81,6 +84,9 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
 
         if (stat(current_path, &st) == -1)
         {
+            free(buffer);
+            free(current_path);
+            closedir(dir);
             return;
         }
 
@@ -107,6 +113,7 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
                 return;
 
             default: // In parent process
+                free(buffer);
                 free(current_path);
                 continue;
             }
@@ -131,10 +138,9 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
             printf("%s\n", current_path);
         }
 
+        free(buffer);
         free(current_path);
     }
-
-    free(buffer);
 
     closedir(dir);
 
