@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -g 
+CFLAGS = -Wall -g
 
 all:
 	@${CC} ${CFLAGS} main.c -o main
-	./main . abc
+	@./main . abc

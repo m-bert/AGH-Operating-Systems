@@ -51,7 +51,7 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
 
     while ((dir_entry = readdir(dir)) != NULL)
     {
-        char *buffer = calloc(sizeof(char), (pattern_length + 1));
+        char *buffer = calloc((pattern_length + 1), sizeof(char));
 
         if (!buffer)
         {
@@ -98,6 +98,7 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
             {
             case -1: // Fork failed
                 perror("Fork failed\n");
+
                 free(buffer);
                 free(current_path);
                 closedir(dir);
@@ -108,7 +109,6 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
 
                 free(buffer);
                 free(current_path);
-
                 closedir(dir);
                 return;
 
@@ -144,8 +144,11 @@ void read_dir(const char *path, const char *pattern, const int pattern_length)
 
     closedir(dir);
 
-    // while (wait(NULL) > 0)
-    //     ;
+    while (wait(NULL) > 0)
+    {
+        // This loop is only to wait for the child processes, so that terminal will show its default prompt after
+        //  all processes have finished
+    }
 
     return;
 }
