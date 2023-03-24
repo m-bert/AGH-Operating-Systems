@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <wait.h>
 
 typedef enum VARIANT
 {
@@ -20,7 +21,7 @@ void set_signal_action(const Variant variant);
 void signal_handler(int sig_no);
 void check_pending_signals();
 
-bool test_fork(Variant variant);
+bool test_inheritance(Variant variant, char *argv[]);
 
 int main(int argc, char *argv[])
 {
@@ -47,13 +48,7 @@ int main(int argc, char *argv[])
 		check_pending_signals();
 	}
 
-	if (execv("./exec_test", argv) == -1)
-	{
-		printf("Failed to process exec\n");
-		return -1;
-	}
-
-	if (!test_fork(variant))
+	if (!test_inheritance(variant, argv))
 	{
 		return -1;
 	}
@@ -145,7 +140,7 @@ void check_pending_signals()
 	return;
 }
 
-bool test_fork(Variant variant)
+bool test_inheritance(Variant variant, char *argv[])
 {
 	pid_t new_process_pid = fork();
 
@@ -167,6 +162,14 @@ bool test_fork(Variant variant)
 		return true;
 
 	default: // In parent process
+		wait(NULL);
+
+		if (execv("./exec_test", argv) == -1)
+		{
+			printf("Failed to process exec\n");
+			return false;
+		}
+
 		return true;
 	}
 }
