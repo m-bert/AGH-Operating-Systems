@@ -7,7 +7,17 @@
 #include <wait.h>
 #include <time.h>
 
-bool running;
+typedef enum State
+{
+	START,
+	NUMBERS,
+	TIME,
+	COUNTER,
+	LOOP_TIME,
+	FINISHED
+} State;
+
+State state;
 int tasks_counter;
 
 void set_signal();
@@ -24,14 +34,18 @@ int main(int argc, char *argv[])
 	printf("Starting catcher with PID:%d\n", getpid());
 	printf("==================================\n");
 
-	running = true;
+	state = START;
 	tasks_counter = 0;
 
 	set_signal();
 
-	while (running)
+	while (state != FINISHED)
 	{
-		// sleep(1);
+		if (state == LOOP_TIME)
+		{
+			print_time();
+			sleep(1);
+		}
 	}
 
 	printf("\n==================================\n");
@@ -52,38 +66,42 @@ void set_signal()
 
 void signal_handler(int sig, siginfo_t *info, void *ucontext)
 {
-	int task = info->si_value.sival_int;
-	int sender_pid = info->si_pid;
-	printf("Signal received: %d with value = %d\n", sig, task);
+	State new_state = (State)info->si_value.sival_int;
+	++tasks_counter;
 
-	switch (task)
+	int sender_pid = info->si_pid;
+
+	switch (new_state)
 	{
-	case 1:
+	case NUMBERS:
 		print_numbers();
 		break;
-	case 2:
+	case TIME:
 		print_time();
 		break;
-	case 3:
+	case COUNTER:
 		print_tasks_counter();
 		break;
-	case 4:
+	case LOOP_TIME:
+	case FINISHED:
 		break;
-	case 5:
-		running = false;
+	default:
 		break;
 	}
+
+	state = new_state;
 
 	kill(sender_pid, SIGUSR1);
 }
 
 void print_numbers()
 {
+	printf("\n==================================\n");
 	for (int i = 1; i <= 100; ++i)
 	{
 		printf("%d ", i);
 	}
-	printf("\n");
+	printf("\n==================================\n");
 
 	return;
 }
@@ -95,21 +113,19 @@ void print_time()
 
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
+
+	printf("\n==================================\n");
 	printf("Current local time and date: %s", asctime(timeinfo));
+	printf("==================================\n");
 
 	return;
 }
 
 void print_tasks_counter()
 {
-	printf("Total number of tasks: %d", ++tasks_counter);
+	printf("\n==================================\n");
+	printf("Total number of tasks: %d\n", tasks_counter);
+	printf("==================================\n");
 
 	return;
-}
-
-void loop_time()
-{
-	// while ()
-	// {
-	// }
 }

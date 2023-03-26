@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
 	for (int i = 2; i < argc; ++i)
 	{
 		int task = atoi(argv[i]);
-		printf("SENDING: %d\n", task);
 
 		if (task < 1 || task > 5)
 		{
