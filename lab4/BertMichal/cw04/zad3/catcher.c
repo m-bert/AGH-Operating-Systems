@@ -58,9 +58,11 @@ int main(int argc, char *argv[])
 void set_signal()
 {
 	struct sigaction action;
+
 	sigemptyset(&action.sa_mask);
 	action.sa_flags = SA_SIGINFO;
 	action.sa_sigaction = &signal_handler;
+
 	sigaction(SIGUSR1, &action, NULL);
 }
 
@@ -69,7 +71,7 @@ void signal_handler(int sig, siginfo_t *info, void *ucontext)
 	State new_state = (State)info->si_value.sival_int;
 	++tasks_counter;
 
-	int sender_pid = info->si_pid;
+	const int sender_pid = info->si_pid;
 
 	switch (new_state)
 	{
@@ -97,10 +99,12 @@ void signal_handler(int sig, siginfo_t *info, void *ucontext)
 void print_numbers()
 {
 	printf("\n==================================\n");
+
 	for (int i = 1; i <= 100; ++i)
 	{
 		printf("%d ", i);
 	}
+
 	printf("\n==================================\n");
 
 	return;
@@ -108,15 +112,19 @@ void print_numbers()
 
 void print_time()
 {
-	time_t rawtime;
-	struct tm *timeinfo;
+	time_t raw_time;
+	struct tm *time_info;
 
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
+	time(&raw_time);
+	time_info = localtime(&raw_time);
+
+	int hours = time_info->tm_hour;
+	int minutes = time_info->tm_min;
+	int seconds = time_info->tm_sec;
 
 	printf("\n==================================\n");
-	printf("Current local time and date: %s", asctime(timeinfo));
-	printf("==================================\n");
+	printf("Current time: %d:%d:%d", hours, minutes, seconds);
+	printf("\n==================================\n");
 
 	return;
 }
