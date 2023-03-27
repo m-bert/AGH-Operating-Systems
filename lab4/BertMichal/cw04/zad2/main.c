@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdbool.h>
 
 typedef enum VARIANT
 {
@@ -17,12 +18,11 @@ Variant choose_variant(const char *variant);
 
 void siginfo_handler(int sig, siginfo_t *info, void *ucontext);
 void resethand_handler(int sig);
-void nodefer_stop_handler(int sig);
-void nodefer_int_handler(int sig);
+void nodefer_handler(int sig);
 
 void siginfo_test();
 void resethand_test();
-void nodefer_test();
+void nodefer_test(bool active);
 
 int main(int argc, char *argv[])
 {
@@ -50,7 +50,29 @@ int main(int argc, char *argv[])
 		resethand_test();
 		break;
 	case NODEFER:
-		nodefer_test();
+		if (argc < 3)
+		{
+			printf("Too few arguments for nodefer\n");
+			return -1;
+		}
+
+		bool active;
+
+		if (strcmp(argv[2], "active") == 0)
+		{
+			active = true;
+		}
+		else if (strcmp(argv[2], "inactive") == 0)
+		{
+			active = false;
+		}
+		else
+		{
+			printf("Invalid argument\n");
+			return -1;
+		}
+
+		nodefer_test(active);
 		break;
 	default:
 		break;
@@ -130,33 +152,32 @@ void resethand_handler(int sig)
 	printf("Testing SA_RESETHAND flag\n");
 }
 
-void nodefer_test()
+void nodefer_test(bool active)
 {
 	// Set action for SIGTSTP
 	struct sigaction stop_action;
 	struct sigaction old_stop_action;
 
 	sigemptyset(&stop_action.sa_mask);
-	stop_action.sa_flags = SA_NODEFER;
-	stop_action.sa_handler = &nodefer_stop_handler;
+
+	if (active)
+	{
+		stop_action.sa_flags = SA_NODEFER;
+	}
+	else
+	{
+		stop_action.sa_flags = 0;
+	}
+
+	stop_action.sa_handler = &nodefer_handler;
 
 	sigaction(SIGTSTP, &stop_action, &old_stop_action);
-
-	// Set action for SIGINT
-	struct sigaction int_action;
-	struct sigaction old_int_action;
-
-	sigemptyset(&int_action.sa_mask);
-	int_action.sa_flags = 0;
-	int_action.sa_handler = &nodefer_int_handler;
-
-	sigaction(SIGINT, &int_action, &old_int_action);
 
 	// Wait for SIGTSTP signal
 	sleep(10);
 }
 
-void nodefer_stop_handler(int sig)
+void nodefer_handler(int sig)
 {
 	printf("\nReceived SIGTSTP\n");
 
@@ -164,11 +185,4 @@ void nodefer_stop_handler(int sig)
 	{
 		sleep(1);
 	}
-}
-void nodefer_int_handler(int sig)
-{
-	sigset_t mask;
-	sigemptyset(&mask);
-	sigaddset(&mask, SIGTSTP);
-	sigprocmask(SIG_SETMASK, &mask, NULL);
 }
