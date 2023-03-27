@@ -16,8 +16,6 @@ typedef enum VARIANT
 
 Variant choose_variant(const char *variant);
 
-void set_signal_action(const Variant variant);
-void signal_handler(int sig_no);
 void check_pending_signals();
 
 int main(int argc, char *argv[])
@@ -26,14 +24,6 @@ int main(int argc, char *argv[])
     printf("EXEC TEST\n");
 
     Variant variant = choose_variant(argv[1]);
-
-    if (variant == INVALID)
-    {
-        printf("Invalid argument\n");
-        return -1;
-    }
-
-    set_signal_action(variant);
 
     raise(SIGUSR1);
 
@@ -68,47 +58,6 @@ Variant choose_variant(const char *variant)
     }
 
     return INVALID;
-}
-
-void set_signal_action(const Variant variant)
-{
-    struct sigaction action;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-
-    sigset_t mask;
-    sigemptyset(&mask);
-
-    switch (variant)
-    {
-    case IGNORE:
-        action.sa_handler = SIG_IGN;
-        sigaction(SIGUSR1, &action, NULL);
-
-        break;
-
-    case HANDLER:
-        action.sa_handler = &signal_handler;
-        sigaction(SIGUSR1, &action, NULL);
-
-        break;
-
-    case MASK:
-    case PENDING:
-        sigaddset(&mask, SIGUSR1);
-        sigprocmask(SIG_SETMASK, &mask, NULL);
-
-        break;
-
-    default:
-        break;
-    }
-}
-
-void signal_handler(int sig_no)
-{
-    printf("Received signal %d\n", sig_no);
-    return;
 }
 
 void check_pending_signals()
