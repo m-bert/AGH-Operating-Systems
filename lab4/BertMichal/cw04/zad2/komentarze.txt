@@ -1,0 +1,37 @@
+==============================================================================================================================================
+Flagi:
+
+SA_SIGINFO:
+
+    Flaga umożliwia otrzymanie dodatkowych parametrów dotyczących sygnału (np przekazywane w funkcji sigqueue wartości).
+    Aby przetestować tą flagę, należy uruchomić program z argumentem "siginfo" oraz wysłać sygnał SIGTSTP (ctrl+z), pojawią się wtedy
+    następujące informacje:
+
+        Signal No: <numer sygnału>
+        PID: <PID proocesu wysyłającego sygnał>
+        User: <UID użytkownika wysyłającego sygnał>
+        User time: <Czas użytkownika poświęceony na wysłanie sygnału>
+        Signal code: <kod sygnału>
+
+    Wywołanie: ./main siginfo
+
+SA_RESETHAND:
+
+    Flaga ta sprawia, że handler sygnału wykonywany jest tylko raz. Aby przetestować ją należy uruchomić program z argumentem "resethand".
+    Program nakłada handler na sygnał SIGINT (ctrl+c), zatem pierwsze wysłanie tego sygnału poskutkuje wywołaniem handlera, 
+    natomiast drugie zakończeniem programu.
+
+    Wywołanie: ./main resethand
+
+SA_NODEFER:
+
+    Flaga ta uniemożliwia zamaskowanie sygnału podczas działania handlera. Aby ją przetestować, należy uruchomić program z 
+    parametrami "nodefer", {"active", "inactive"}, które odpowiednio włączają lub wyłączają flagę. Następnie w przeciągu 10 sekund
+    należy wysłać wygnał SIGTSTP (ctrl+z), inaczej program się zakończy. 
+
+    W przypadku opcji active można zaobserwować, że handler jest wywoływany przy każdym wysłaniu sygnału SIGTSTP, jeżeli natomiast
+    wywołamy program z opcją inactive, flaga zostanie zamaskowana na czas działania handlera, zatem nie zobaczymy więcej komunikatu o
+    otrzymaniu sygnału.
+
+    Wywołanie: ./main nodefer <active | inactive>
+==============================================================================================================================================

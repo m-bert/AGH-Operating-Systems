@@ -1,0 +1,23 @@
+======================================================================
+Parametry:
+
+ignore:
+    parent: sygnał jest ignorowany
+    fork: jest dziedziczony (sygnał jest ignorowany)
+    exec: jest dziedziczony (sygnał jest ignorowany)
+
+handler:
+    parent: sygnał jest obsługiwany przez handler
+    fork: jest dziedziczony (sygnał jest przetwarzany przez handler)
+    exec: nie jest dziedziczony (wykonywana jest domyślna akcja)
+
+mask:
+    parent: sygnał nie jest odbierany
+    fork: jest dziedziczony (sygnał nie jest odbierany)
+    exec: jest dziedziczony (sygnał nie jest odbierany)
+
+pending:
+    parent: sygnał jest widoczny  w kolejce oczekującej
+    fork: sygnał rodzica nie jest widoczny w kolejce oczekującej
+    exec: sygnał rodzica jest widoczny w kolejce oczekującej
+======================================================================
