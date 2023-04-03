@@ -7,6 +7,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#define PIPE_PATH "./tmp_pipe"
+#define BUFFER_SIZE 64
+
 double f(double x)
 {
     return 4 / (x * x + 1);
@@ -40,13 +43,13 @@ int main(int argc, char *argv[])
         midpoint += rect_width;
     }
 
-    FILE *fifo = fopen("./tmp_pipe", "w");
-
-    char *buffer = calloc(32, sizeof(char));
+    char *buffer = calloc(BUFFER_SIZE, sizeof(char));
     sprintf(buffer, "%lf\n", result);
-    fwrite(buffer, sizeof(char), strlen(buffer), fifo);
 
-    fclose(fifo);
+    int fifo = open(PIPE_PATH, O_WRONLY);
+    write(fifo, buffer, strlen(buffer));
+    close(fifo);
+
     free(buffer);
 
     return 0;
