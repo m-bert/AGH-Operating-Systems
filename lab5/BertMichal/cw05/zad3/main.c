@@ -44,10 +44,10 @@ int main(int argc, char *argv[])
     remove(PIPE_PATH);
 
     printf("==========================================\n");
-    printf("Rectangle width:\t%.15lf\n", rect_width);
-    printf("Number of processes:\t%d\n", processes_amount);
-    printf("Area:\t\t\t%.15lf\n", result);
-    printf("Time elapsed:\t\t%.5lfs\n", time_elapsed);
+    printf("Rectangle width:\t\t%.15lf\n", rect_width);
+    printf("Number of programms:\t%d\n", processes_amount);
+    printf("Area:\t\t\t\t\t%.15lf\n", result);
+    printf("Time elapsed:\t\t\t%.5lfs\n", time_elapsed);
     printf("==========================================\n");
 
     return 0;

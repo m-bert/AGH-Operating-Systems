@@ -44,10 +44,10 @@ int main(int argc, char *argv[])
     double time_elapsed = calculate_time(start_time, end_time);
 
     printf("==========================================\n");
-    printf("Rectangle width:\t%.15lf\n", rect_width);
+    printf("Rectangle width:\t\t%.15lf\n", rect_width);
     printf("Number of processes:\t%d\n", processes_amount);
-    printf("Area:\t\t\t%.15lf\n", result);
-    printf("Time elapsed:\t\t%.5lfs\n", time_elapsed);
+    printf("Area:\t\t\t\t\t%.15lf\n", result);
+    printf("Time elapsed:\t\t\t%.5lfs\n", time_elapsed);
     printf("==========================================\n");
 
     return 0;
@@ -84,6 +84,8 @@ double calculate_area(double rect_width, int processes_amount)
 {
     double result = 0.0;
 
+    int *output_pipes = calloc(processes_amount, sizeof(int));
+
     for (int i = 0; i < processes_amount; ++i)
     {
         int fd[2];
@@ -109,18 +111,26 @@ double calculate_area(double rect_width, int processes_amount)
 
         default: // In parent process
             close(fd[1]);
-
-            waitpid(new_process_pid, NULL, 0);
-
-            char parent_buffer[BUFFER_SIZE];
-            read(fd[0], parent_buffer, sizeof(parent_buffer));
-            close(fd[0]);
-
-            result += atof(parent_buffer);
+            output_pipes[i] = fd[0];
 
             break;
         }
     }
+
+    while (wait(NULL) > 0)
+    {
+        // Waiting for children...
+    }
+
+    char buffer[BUFFER_SIZE];
+
+    for (int i = 0; i < processes_amount; ++i)
+    {
+        read(output_pipes[i], buffer, BUFFER_SIZE);
+        result += atof(buffer);
+    }
+
+    free(output_pipes);
 
     return result;
 }
