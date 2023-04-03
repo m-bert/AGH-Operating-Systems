@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
+#include <math.h>
 
 #define PIPE_PATH "./tmp_pipe"
 #define CALC_PATH "./fragment_calculator"
@@ -16,6 +18,7 @@
 
 bool get_parameters(int argc, char *argv[], double *rect_width, int *processes_amount);
 double calculate_area(double rect_width, int processes_amount);
+double calculate_time(struct timespec start_time, struct timespec end_time);
 
 int main(int argc, char *argv[])
 {
@@ -30,10 +33,22 @@ int main(int argc, char *argv[])
 
     mkfifo(PIPE_PATH, 0666);
 
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_REALTIME, &start_time);
+
     double result = calculate_area(rect_width, processes_amount);
-    printf("Area under the curve is %lf\n", result);
+
+    clock_gettime(CLOCK_REALTIME, &end_time);
+    double time_elapsed = calculate_time(start_time, end_time);
 
     remove(PIPE_PATH);
+
+    printf("==========================================\n");
+    printf("Rectangle width:\t%.15lf\n", rect_width);
+    printf("Number of processes:\t%d\n", processes_amount);
+    printf("Area:\t\t\t%.15lf\n", result);
+    printf("Time elapsed:\t\t%.5lfs\n", time_elapsed);
+    printf("==========================================\n");
 
     return 0;
 }
@@ -69,7 +84,7 @@ double calculate_area(double rect_width, int processes_amount)
 {
     char arg1[ARG_SIZE], arg2[ARG_SIZE];
 
-    sprintf(arg1, "%lf", rect_width);
+    sprintf(arg1, "%.20lf", rect_width);
     sprintf(arg2, "%d", processes_amount);
 
     for (int i = 0; i < processes_amount; ++i)
@@ -120,4 +135,24 @@ double calculate_area(double rect_width, int processes_amount)
     close(fifo);
 
     return result;
+}
+
+double calculate_time(struct timespec start_time, struct timespec end_time)
+{
+
+    double s_delta = (double)end_time.tv_sec - (double)start_time.tv_sec;
+    double ns_delta = (double)end_time.tv_nsec - (double)start_time.tv_nsec;
+
+    double seconds = s_delta;
+    double nanoseconds = ns_delta;
+
+    if (ns_delta < 0)
+    {
+        seconds -= 1.0;
+        nanoseconds = pow(10, 9) + ns_delta;
+    }
+
+    nanoseconds /= pow(10, 9);
+
+    return seconds + nanoseconds;
 }
