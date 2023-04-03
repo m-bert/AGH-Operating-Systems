@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 double f(double x)
 {
@@ -41,11 +42,12 @@ int main(int argc, char *argv[])
 
     FILE *fifo = fopen("./tmp_pipe", "w");
 
-    char buffer[32];
+    char *buffer = calloc(32, sizeof(char));
     sprintf(buffer, "%lf\n", result);
     fwrite(buffer, sizeof(char), strlen(buffer), fifo);
 
     fclose(fifo);
+    free(buffer);
 
     return 0;
 }

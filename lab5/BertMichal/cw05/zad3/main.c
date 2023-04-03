@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 bool get_parameters(int argc, char *argv[], double *rect_width, int *processes_amount);
 double calculate_area(double rect_width, int processes_amount);
@@ -21,12 +22,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    mkfifo("./tmp_pipe", 0777);
+    mkfifo("./tmp_pipe", 0666);
 
     double result = calculate_area(rect_width, processes_amount);
     printf("Area under the curve is %lf\n", result);
 
-    remove("./tmp_pipe");
+    unlink("./tmp_pipe");
 
     return 0;
 }
@@ -83,38 +84,37 @@ double calculate_area(double rect_width, int processes_amount)
                           arg2,
                           arg3, NULL};
 
-            if (execv("./fragment_calculator", av) == -1)
-            {
-                printf("Exec failed\n");
-                exit(-1);
-            }
+            execv("./fragment_calculator", av);
 
             break;
         default: // In parent process
-            int child_status;
-            // waitpid(new_process_pid, &child_status, 0);
-
-            // if (child_status != 0)
-            // {
-            //     return -1.0;
-            // }
-            // wait(NULL);
-
             break;
         }
     }
 
-    FILE *fifo = fopen("./tmp_pipe", "r");
+    int fifo = open("./tmp_pipe", O_RDONLY);
 
-    char buffer[32];
+    char line_buffer[1024];
 
-    while (fgets(buffer, sizeof(buffer), fifo) != NULL)
+    int already_read = 0;
+
+    while (already_read < processes_amount)
     {
-        result += atof(buffer);
-        printf("%s\n", buffer);
+        size_t read_amount = read(fifo, line_buffer, 1024);
+        line_buffer[read_amount] = 0;
+
+        char *buffer = strtok(line_buffer, "\n");
+
+        while (buffer != NULL)
+        {
+            result += atof(buffer);
+            ++already_read;
+
+            buffer = strtok(NULL, "\n");
+        }
     }
 
-    fclose(fifo);
+    close(fifo);
 
     return result;
 }
