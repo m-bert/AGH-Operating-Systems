@@ -13,7 +13,7 @@ report:
 	@./main 0.000000001 5 >> report.txt
 	@./main 0.000000001 10 >> report.txt
 	@./main 0.000000001 100 >> report.txt
-	@ rm -rf main
+	@ rm -rf main fragment_calculator
 
 clean:
-	@rm -rf main fragment_calculator tmp_pipe report.txt
+	@rm -rf main fragment_calculator report.txt
