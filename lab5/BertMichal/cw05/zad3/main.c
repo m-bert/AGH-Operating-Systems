@@ -12,6 +12,7 @@
 #define CALC_PATH "./fragment_calculator"
 #define BUFFER_SIZE 1024
 #define ARG_SIZE 32
+#define DELIMITER "\n"
 
 bool get_parameters(int argc, char *argv[], double *rect_width, int *processes_amount);
 double calculate_area(double rect_width, int processes_amount);
@@ -105,14 +106,14 @@ double calculate_area(double rect_width, int processes_amount)
         // Terminate string earlier so that it doesn't contain any garbage that would unwillingly increment received_results
         line_buffer[read_amount] = '\0';
 
-        char *result_buffer = strtok(line_buffer, "\n");
+        char *result_buffer = strtok(line_buffer, DELIMITER);
 
         while (result_buffer != NULL)
         {
             result += atof(result_buffer);
             ++received_results;
 
-            result_buffer = strtok(NULL, "\n");
+            result_buffer = strtok(NULL, DELIMITER);
         }
     }
 
