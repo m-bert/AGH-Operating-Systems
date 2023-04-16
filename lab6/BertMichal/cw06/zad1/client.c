@@ -107,6 +107,7 @@ int send_init(key_t client_key)
 {
     MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
     msg_buffer->mtype = INIT;
+    strcpy(msg_buffer->mtext, "INIT");
     msg_buffer->client_key = client_key;
 
     MsgBuffer *response_buffer = malloc(sizeof(MsgBuffer));
@@ -127,6 +128,7 @@ void handle_list()
     MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
     msg_buffer->client_id = client_id;
     msg_buffer->mtype = LIST;
+    strcpy(msg_buffer->mtext, "LIST");
 
     msgsnd(server_queue_id, msg_buffer, MSG_SIZE, DEFAULT_MSG_FLAG);
     free(msg_buffer);
@@ -163,6 +165,7 @@ void handle_stop()
 {
     MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
     msg_buffer->mtype = STOP;
+    strcpy(msg_buffer->mtext, "STOP");
     msg_buffer->client_id = client_id;
 
     msgsnd(server_queue_id, msg_buffer, MSG_SIZE, DEFAULT_MSG_FLAG);

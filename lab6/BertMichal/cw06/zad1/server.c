@@ -2,9 +2,11 @@
 
 int server_queue_id;
 int client_queues[MAX_CLIENTS] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+FILE *log_file;
 
 void exit_handler();
 int find_next_id();
+void perform_log(MsgBuffer *msg_buffer);
 
 void add_client(int client_key);
 void remove_client(int client_id);
@@ -14,6 +16,8 @@ void send_to_all(int sender_id, char *message);
 
 int main(int argc, char *argv[])
 {
+    log_file = fopen("log.txt", "w");
+
     server_queue_id = msgget(SERVER_KEY, IPC_CREAT | 0666);
 
     struct sigaction action;
@@ -25,6 +29,7 @@ int main(int argc, char *argv[])
     while (true)
     {
         msgrcv(server_queue_id, msg_buffer, MSG_SIZE, RECEIVE_PRIORITY_FLAG, DEFAULT_MSG_FLAG);
+        perform_log(msg_buffer);
 
         switch (msg_buffer->mtype)
         {
@@ -74,6 +79,7 @@ void exit_handler()
 
     msgctl(server_queue_id, IPC_RMID, NULL);
 
+    fclose(log_file);
     exit(0);
 }
 
@@ -174,4 +180,22 @@ void send_to_all(int sender_id, char *message)
     }
 
     free(msg_buffer);
+}
+
+void perform_log(MsgBuffer *msg_buffer)
+{
+    char log[2 * MAX_MSG_SIZE];
+    char date[64];
+
+    time_t rawtime;
+    time(&rawtime);
+
+    struct tm *timeinfo = localtime(&rawtime);
+
+    sprintf(date, "%s", asctime(timeinfo));
+    date[strlen(date) - 1] = '\0'; // Remove \n
+
+    sprintf(log, "[%s][ID: %d][%ld] %s\n", date, msg_buffer->client_id, msg_buffer->mtype, msg_buffer->mtext);
+    printf("%s\n", log);
+    fwrite(log, sizeof(char), strlen(log), log_file);
 }
