@@ -89,8 +89,6 @@ int main(int argc, char *argv[])
 
             continue;
         }
-
-        handle_server_response();
     }
 
     return 0;
@@ -131,8 +129,9 @@ void handle_list()
     msg_buffer->mtype = LIST;
 
     msgsnd(server_queue_id, msg_buffer, MSG_SIZE, DEFAULT_MSG_FLAG);
-
     free(msg_buffer);
+
+    handle_server_response();
 }
 
 void handle_to_one(int other_id, char *message)

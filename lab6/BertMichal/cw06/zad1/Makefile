@@ -6,4 +6,4 @@ all:
 	@${CC} ${CFLAGS} client.c -o client
 
 clean:
-	# rm -rf server client
+	@rm -rf server client
