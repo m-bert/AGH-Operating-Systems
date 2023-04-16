@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall -g -fsanitize=address
 
 all:
-	@${CC} ${CFLAGS} server.c server
-	@${CC} ${CFLAGS} client.c client
+	@${CC} ${CFLAGS} server.c -o server
+	@${CC} ${CFLAGS} client.c -o client
 
 clean:
-	rm -rf server client
+	@rm -rf server client
