@@ -2,9 +2,11 @@
 
 mqd_t server_queue_descriptor;
 mqd_t client_queues[MAX_CLIENTS] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+FILE *log_file;
 
 void exit_handler();
 int find_next_id();
+void perform_log(int cmd, int client_id, char *message);
 
 void add_client(char *client_queue_name);
 void remove_client(int client_id);
@@ -14,6 +16,8 @@ void send_to_all(int sender_id, char *message);
 
 int main(int argc, char *argv[])
 {
+    log_file = fopen("log.txt", "w");
+
     struct mq_attr mq_attributes;
     mq_attributes.mq_msgsize = MAX_MSG_SIZE;
     mq_attributes.mq_maxmsg = MAX_CLIENTS;
@@ -25,8 +29,7 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        char msg[MAX_MSG_SIZE];
-        msg[0] = '\0'; // Clears buffer
+        char msg[MAX_MSG_SIZE] = "";
 
         mq_receive(server_queue_descriptor, msg, MAX_MSG_SIZE, NULL);
 
@@ -35,31 +38,29 @@ int main(int argc, char *argv[])
         int other_id = atoi(strtok(NULL, DELIMITER));
 
         char *tmp;
-        char message[MAX_MSG_SIZE];
+        char message[MAX_MSG_SIZE] = "";
+
+        while ((tmp = strtok(NULL, DELIMITER)) != NULL)
+        {
+            strcat(message, tmp);
+            strcat(message, " ");
+        }
+
+        perform_log(cmd, client_id, message);
 
         switch (cmd)
         {
         case INIT:
-            char *client_queue_name = strtok(NULL, DELIMITER);
-            add_client(client_queue_name);
+            message[strlen(message) - 1] = '\0'; // Trim \n
+            add_client(message);
             break;
         case LIST:
             send_clients_list(client_id);
             break;
         case TO_ONE:
-            while ((tmp = strtok(NULL, DELIMITER)) != NULL)
-            {
-                strcat(message, tmp);
-                strcat(message, " ");
-            }
             send_to_one(other_id, message);
             break;
         case TO_ALL:
-            while ((tmp = strtok(NULL, DELIMITER)) != NULL)
-            {
-                strcat(message, tmp);
-                strcat(message, " ");
-            }
             send_to_all(client_id, message);
             break;
         case STOP:
@@ -74,8 +75,7 @@ int main(int argc, char *argv[])
 
 void exit_handler()
 {
-    printf("exit_handler\n");
-    char msg[MAX_MSG_SIZE];
+    char msg[MAX_MSG_SIZE] = "";
     sprintf(msg, "%d %s", STOP, "STOP");
 
     char *response = calloc(MAX_MSG_SIZE, sizeof(char));
@@ -113,7 +113,7 @@ int find_next_id()
 
 void add_client(char *client_queue_name)
 {
-    char msg[MAX_MSG_SIZE];
+    char msg[MAX_MSG_SIZE] = "";
     int new_client_id = find_next_id();
     mqd_t client_queue_descriptor = mq_open(client_queue_name, O_RDWR);
 
@@ -131,7 +131,7 @@ void add_client(char *client_queue_name)
 
 void remove_client(int client_id)
 {
-    char msg[MAX_MSG_SIZE];
+    char msg[MAX_MSG_SIZE] = "";
     sprintf(msg, "%d %s", Q_CLOSED, "Q_CLOSED");
 
     mq_send(client_queues[client_id], msg, MAX_MSG_SIZE, Q_CLOSED);
@@ -157,17 +157,15 @@ void send_clients_list(int client_id)
         strcat(active_clients_ids, tmp);
     }
 
-    char *msg = calloc(MAX_MSG_SIZE, sizeof(char));
+    char msg[MAX_MSG_SIZE] = "";
     sprintf(msg, "%d %s", LIST, active_clients_ids);
 
     mq_send(client_queues[client_id], msg, MAX_MSG_SIZE, LIST);
-
-    free(msg);
 }
 
 void send_to_one(int client_id, char *message)
 {
-    char msg[MAX_MSG_SIZE];
+    char msg[MAX_MSG_SIZE] = "";
     sprintf(msg, "%d %s", TO_ONE, message);
 
     mq_send(client_queues[client_id], msg, MAX_MSG_SIZE, TO_ONE);
@@ -175,7 +173,7 @@ void send_to_one(int client_id, char *message)
 
 void send_to_all(int sender_id, char *message)
 {
-    char msg[MAX_MSG_SIZE];
+    char msg[MAX_MSG_SIZE] = "";
     sprintf(msg, "%d %s", TO_ALL, message);
 
     for (int i = 0; i < MAX_CLIENTS; ++i)
@@ -186,4 +184,22 @@ void send_to_all(int sender_id, char *message)
         }
         mq_send(client_queues[i], msg, MAX_MSG_SIZE, TO_ALL);
     }
+}
+
+void perform_log(int cmd, int client_id, char *message)
+{
+    char log[2 * MAX_MSG_SIZE];
+    char date[64];
+
+    time_t rawtime;
+    time(&rawtime);
+
+    struct tm *timeinfo = localtime(&rawtime);
+
+    sprintf(date, "%s", asctime(timeinfo));
+    date[strlen(date) - 1] = '\0'; // Remove \n
+
+    sprintf(log, "[%s][ID: %d][%d] %s\n", date, client_id, cmd, message);
+    printf("%s\n", log);
+    fwrite(log, sizeof(char), strlen(log), log_file);
 }

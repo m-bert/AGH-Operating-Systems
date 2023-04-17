@@ -8,8 +8,9 @@ char client_queue_name[MAX_QUEUE_NAME];
 
 void generate_queue_name();
 int send_init();
-Commands convert_command(char *command);
 void close_queues();
+void format_message(char *message, int cmd, int client_id, int other_id, char *content);
+Commands convert_command(char *command);
 
 void handle_list();
 void handle_to_one(int other_id, char *message);
@@ -41,7 +42,7 @@ int main(int argc, char *argv[])
     action.sa_handler = &handle_stop;
     sigaction(SIGINT, &action, NULL);
 
-    char line_buffer[LINE_BUFFER_LENGTH];
+    char line_buffer[LINE_BUFFER_LENGTH] = "";
     while (true)
     {
         check_incoming_messages();
@@ -85,15 +86,14 @@ int main(int argc, char *argv[])
             }
             handle_to_one(other_id, message);
 
-            continue;
+            break;
+
         case STOP:
             handle_stop();
-
             break;
         default:
             printf("Unknown command\n");
-
-            continue;
+            break;
         }
     }
 
@@ -107,12 +107,11 @@ void generate_queue_name()
 
 int send_init()
 {
-    char msg[MAX_MSG_SIZE];
-    char response[MAX_MSG_SIZE];
-
-    sprintf(msg, "%d %d %d %s", INIT, -1, -1, client_queue_name);
-
+    char msg[MAX_MSG_SIZE] = "";
+    format_message(msg, INIT, -1, -1, client_queue_name);
     mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, INIT);
+
+    char response[MAX_MSG_SIZE] = "";
     mq_receive(client_queue_descriptor, response, MAX_MSG_SIZE, NULL);
 
     int client_id = atoi(response);
@@ -122,8 +121,8 @@ int send_init()
 
 void handle_list()
 {
-    char msg[MAX_MSG_SIZE];
-    sprintf(msg, "%d %d %d %s", LIST, client_id, -1, "LIST");
+    char msg[MAX_MSG_SIZE] = "";
+    format_message(msg, LIST, client_id, -1, "LIST");
 
     mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, LIST);
 
@@ -132,24 +131,24 @@ void handle_list()
 
 void handle_to_one(int other_id, char *message)
 {
-    char msg[MAX_MSG_SIZE];
-    sprintf(msg, "%d %d %d %s", TO_ONE, client_id, other_id, message);
+    char msg[MAX_MSG_SIZE] = "";
+    format_message(msg, TO_ONE, client_id, other_id, message);
 
     mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, TO_ONE);
 }
 
 void handle_to_all(char *message)
 {
-    char msg[MAX_MSG_SIZE];
-    sprintf(msg, "%d %d %d %s", TO_ALL, client_id, -1, message);
+    char msg[MAX_MSG_SIZE] = "";
+    format_message(msg, TO_ALL, client_id, -1, message);
 
     mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, TO_ALL);
 }
 
 void handle_stop()
 {
-    char msg[MAX_MSG_SIZE];
-    sprintf(msg, "%d %d %d %s", STOP, client_id, -1, "STOP");
+    char msg[MAX_MSG_SIZE] = "";
+    format_message(msg, STOP, client_id, -1, "STOP");
 
     mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, STOP);
 
@@ -158,24 +157,23 @@ void handle_stop()
 
 void handle_server_response()
 {
-    char *msg = calloc(MAX_MSG_SIZE, sizeof(char));
+    char msg[MAX_MSG_SIZE] = "";
     mq_receive(client_queue_descriptor, msg, MAX_MSG_SIZE, NULL);
 
     char *tmp;
     int cmd = atoi(strtok(msg, DELIMITER));
 
-    char *message = calloc(MAX_MSG_SIZE, sizeof(char));
+    char msg_content[MAX_MSG_SIZE] = "";
     while ((tmp = strtok(NULL, DELIMITER)) != NULL)
     {
-        strcat(message, tmp);
-        strcat(message, " ");
+        strcat(msg_content, tmp);
+        strcat(msg_content, " ");
     }
 
     switch (cmd)
     {
     case STOP:
-        free(msg);
-        free(message);
+
         handle_stop();
         break;
     case Q_CLOSED:
@@ -185,14 +183,11 @@ void handle_server_response()
     case LIST:
     case TO_ONE:
     case TO_ALL:
-        printf("%s\n", message);
+        printf("%s\n", msg_content);
         break;
     default:
         break;
     }
-
-    free(msg);
-    free(message);
 }
 
 void check_incoming_messages()
@@ -235,4 +230,9 @@ void close_queues()
     mq_close(server_queue_descriptor);
     mq_close(client_queue_descriptor);
     mq_unlink(client_queue_name);
+}
+
+void format_message(char *message, int cmd, int client_id, int other_id, char *content)
+{
+    sprintf(message, "%d %d %d %s", cmd, client_id, other_id, content);
 }
