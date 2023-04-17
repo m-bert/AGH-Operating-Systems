@@ -24,26 +24,24 @@
 
 #define PRIORITY_HIGHEST 10
 
-typedef struct MsgBuffer
-{
-    long mtype;
-    char mtext[MAX_MSG_SIZE];
-
-    mqd_t client_queue_descriptor;
-    int client_id;
-    int other_id;
-} MsgBuffer;
-
-#define MSG_SIZE sizeof(MsgBuffer) - sizeof(long)
-
 typedef enum Commands
 {
     INVALID = 1,
     TO_ONE,
     TO_ALL,
     LIST,
+    Q_CLOSED,
     STOP,
     INIT,
 } Commands;
+typedef struct MsgBuffer
+{
+    long mtype;
+    char mtext[MAX_MSG_SIZE];
+
+    mqd_t client_queue_name;
+    int client_id;
+    int other_id;
+} MsgBuffer;
 
 #endif

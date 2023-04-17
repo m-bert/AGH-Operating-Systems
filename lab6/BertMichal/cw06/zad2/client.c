@@ -9,6 +9,7 @@ char client_queue_name[MAX_QUEUE_NAME];
 void generate_queue_name();
 int send_init();
 Commands convert_command(char *command);
+void close_queues();
 
 void handle_list();
 void handle_to_one(int other_id, char *message);
@@ -106,104 +107,92 @@ void generate_queue_name()
 
 int send_init()
 {
-    MsgBuffer *msg_buffer = calloc(1, sizeof(MsgBuffer));
-    msg_buffer->mtype = INIT;
-    strcpy(msg_buffer->mtext, client_queue_name);
+    char msg[MAX_MSG_SIZE];
+    char response[MAX_MSG_SIZE];
 
-    MsgBuffer *response_buffer = calloc(1, sizeof(MsgBuffer));
+    sprintf(msg, "%d %d %d %s", INIT, -1, -1, client_queue_name);
 
-    mq_send(server_queue_descriptor, (char *)msg_buffer, MAX_MSG_SIZE, INIT);
-    mq_receive(client_queue_descriptor, (char *)response_buffer, MSG_SIZE, NULL);
+    mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, INIT);
+    mq_receive(client_queue_descriptor, response, MAX_MSG_SIZE, NULL);
 
-    int client_id = response_buffer->client_id;
-
-    free(msg_buffer);
-    free(response_buffer);
+    int client_id = atoi(response);
 
     return client_id;
 }
 
 void handle_list()
 {
-    MsgBuffer *msg_buffer = calloc(1, sizeof(MsgBuffer));
-    msg_buffer->client_id = client_id;
-    msg_buffer->mtype = LIST;
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %d %d %s", LIST, client_id, -1, "LIST");
 
-    printf("ID: %d\n", client_id);
-
-    mq_send(server_queue_descriptor, (char *)msg_buffer, MAX_MSG_SIZE, LIST);
-
-    free(msg_buffer);
+    mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, LIST);
 
     handle_server_response();
 }
 
 void handle_to_one(int other_id, char *message)
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    msg_buffer->client_id = client_id;
-    msg_buffer->other_id = other_id;
-    strcpy(msg_buffer->mtext, message);
-    msg_buffer->mtype = TO_ONE;
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %d %d %s", TO_ONE, client_id, other_id, message);
 
-    mq_send(server_queue_descriptor, (char *)msg_buffer, MAX_MSG_SIZE, TO_ONE);
-
-    free(msg_buffer);
+    mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, TO_ONE);
 }
 
 void handle_to_all(char *message)
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    msg_buffer->client_id = client_id;
-    strcpy(msg_buffer->mtext, message);
-    msg_buffer->mtype = TO_ALL;
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %d %d %s", TO_ALL, client_id, -1, message);
 
-    mq_send(server_queue_descriptor, (char *)msg_buffer, MAX_MSG_SIZE, TO_ALL);
-
-    free(msg_buffer);
+    mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, TO_ALL);
 }
 
 void handle_stop()
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    msg_buffer->mtype = STOP;
-    msg_buffer->client_id = client_id;
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %d %d %s", STOP, client_id, -1, "STOP");
 
-    MsgBuffer *response_buffer = malloc(sizeof(MsgBuffer));
+    mq_send(server_queue_descriptor, msg, MAX_MSG_SIZE, STOP);
 
-    mq_send(server_queue_descriptor, (char *)msg_buffer, MAX_MSG_SIZE, STOP);
-    mq_receive(client_queue_descriptor, (char *)response_buffer, MSG_SIZE, NULL);
-
-    mq_close(server_queue_descriptor);
-
-    mq_close(client_queue_descriptor);
-    mq_unlink(client_queue_name);
-
-    free(msg_buffer);
-    free(response_buffer);
-    exit(0);
+    handle_server_response();
 }
 
 void handle_server_response()
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    mq_receive(client_queue_descriptor, (char *)msg_buffer, MSG_SIZE, NULL);
+    char *msg = calloc(MAX_MSG_SIZE, sizeof(char));
+    mq_receive(client_queue_descriptor, msg, MAX_MSG_SIZE, NULL);
 
-    switch (msg_buffer->mtype)
+    char *tmp;
+    int cmd = atoi(strtok(msg, DELIMITER));
+
+    char *message = calloc(MAX_MSG_SIZE, sizeof(char));
+    while ((tmp = strtok(NULL, DELIMITER)) != NULL)
+    {
+        strcat(message, tmp);
+        strcat(message, " ");
+    }
+
+    switch (cmd)
     {
     case STOP:
+        free(msg);
+        free(message);
         handle_stop();
+        break;
+    case Q_CLOSED:
+        close_queues();
+        exit(0);
         break;
     case LIST:
     case TO_ONE:
     case TO_ALL:
-        printf("%s\n", msg_buffer->mtext);
+        printf("%s\n", message);
         break;
     default:
         break;
     }
 
-    free(msg_buffer);
+    free(msg);
+    free(message);
 }
 
 void check_incoming_messages()
@@ -239,4 +228,11 @@ Commands convert_command(char *command)
     }
 
     return INVALID;
+}
+
+void close_queues()
+{
+    mq_close(server_queue_descriptor);
+    mq_close(client_queue_descriptor);
+    mq_unlink(client_queue_name);
 }

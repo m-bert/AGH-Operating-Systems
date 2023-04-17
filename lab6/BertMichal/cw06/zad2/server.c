@@ -23,29 +23,47 @@ int main(int argc, char *argv[])
     action.sa_handler = &exit_handler;
     sigaction(SIGINT, &action, NULL);
 
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-
     while (true)
     {
-        mq_receive(server_queue_descriptor, (char *)msg_buffer, MSG_SIZE, NULL);
+        char msg[MAX_MSG_SIZE];
+        msg[0] = '\0'; // Clears buffer
 
-        switch (msg_buffer->mtype)
+        mq_receive(server_queue_descriptor, msg, MAX_MSG_SIZE, NULL);
+
+        int cmd = atoi(strtok(msg, DELIMITER));
+        int client_id = atoi(strtok(NULL, DELIMITER));
+        int other_id = atoi(strtok(NULL, DELIMITER));
+
+        char *tmp;
+        char message[MAX_MSG_SIZE];
+
+        switch (cmd)
         {
         case INIT:
-            add_client(msg_buffer->mtext);
+            char *client_queue_name = strtok(NULL, DELIMITER);
+            add_client(client_queue_name);
             break;
         case LIST:
-            printf("SWITCH%d\n", msg_buffer->client_id);
-            send_clients_list(msg_buffer->client_id);
+            send_clients_list(client_id);
             break;
         case TO_ONE:
-            send_to_one(msg_buffer->other_id, msg_buffer->mtext);
+            while ((tmp = strtok(NULL, DELIMITER)) != NULL)
+            {
+                strcat(message, tmp);
+                strcat(message, " ");
+            }
+            send_to_one(other_id, message);
             break;
         case TO_ALL:
-            send_to_all(msg_buffer->client_id, msg_buffer->mtext);
+            while ((tmp = strtok(NULL, DELIMITER)) != NULL)
+            {
+                strcat(message, tmp);
+                strcat(message, " ");
+            }
+            send_to_all(client_id, message);
             break;
         case STOP:
-            remove_client(msg_buffer->client_id);
+            remove_client(client_id);
         default:
             break;
         }
@@ -56,8 +74,11 @@ int main(int argc, char *argv[])
 
 void exit_handler()
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    MsgBuffer *response_buffer = malloc(sizeof(MsgBuffer));
+    printf("exit_handler\n");
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %s", STOP, "STOP");
+
+    char *response = calloc(MAX_MSG_SIZE, sizeof(char));
 
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
@@ -66,15 +87,10 @@ void exit_handler()
             continue;
         }
 
-        msg_buffer->client_id = i;
-        msg_buffer->mtype = STOP;
-
-        mq_send(client_queues[i], (char *)msg_buffer, MAX_MSG_SIZE, PRIORITY_HIGHEST);
-        mq_receive(server_queue_descriptor, (char *)response_buffer, MSG_SIZE, NULL);
+        mq_send(client_queues[i], msg, MAX_MSG_SIZE, PRIORITY_HIGHEST);
+        mq_receive(server_queue_descriptor, response, MAX_MSG_SIZE, NULL);
+        remove_client(i);
     }
-
-    free(msg_buffer);
-    free(response_buffer);
 
     mq_close(server_queue_descriptor);
     mq_unlink(SERVER_QUEUE_PATH);
@@ -97,8 +113,7 @@ int find_next_id()
 
 void add_client(char *client_queue_name)
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-
+    char msg[MAX_MSG_SIZE];
     int new_client_id = find_next_id();
     mqd_t client_queue_descriptor = mq_open(client_queue_name, O_RDWR);
 
@@ -107,33 +122,27 @@ void add_client(char *client_queue_name)
         client_queues[new_client_id] = client_queue_descriptor;
     }
 
-    msg_buffer->client_id = new_client_id;
-    msg_buffer->mtype = INIT;
+    sprintf(msg, "%d", new_client_id);
 
-    mq_send(client_queue_descriptor, (char *)msg_buffer, MAX_MSG_SIZE, INIT);
-
-    free(msg_buffer);
+    mq_send(client_queue_descriptor, msg, MAX_MSG_SIZE, INIT);
 
     return;
 }
 
 void remove_client(int client_id)
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    msg_buffer->mtype = STOP;
-    msg_buffer->client_id = client_id;
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %s", Q_CLOSED, "Q_CLOSED");
 
-    mq_send(client_queues[client_id], (char *)msg_buffer, MAX_MSG_SIZE, STOP);
+    mq_send(client_queues[client_id], msg, MAX_MSG_SIZE, Q_CLOSED);
     mq_close(client_queues[client_id]);
 
     client_queues[client_id] = -1;
-
-    free(msg_buffer);
 }
 
 void send_clients_list(int client_id)
 {
-    char active_clients_ids[MAX_MSG_SIZE] = "";
+    char active_clients_ids[128] = "";
 
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
@@ -148,35 +157,26 @@ void send_clients_list(int client_id)
         strcat(active_clients_ids, tmp);
     }
 
-    MsgBuffer *msg_buffer = calloc(1, sizeof(MsgBuffer));
-    msg_buffer->client_id = client_id;
-    msg_buffer->mtype = LIST;
-    strcpy(msg_buffer->mtext, active_clients_ids);
-    printf("%d \n", client_id);
+    char *msg = calloc(MAX_MSG_SIZE, sizeof(char));
+    sprintf(msg, "%d %s", LIST, active_clients_ids);
 
-    mq_send(client_queues[client_id], (char *)msg_buffer, MAX_MSG_SIZE, LIST);
-    perror("SEND");
+    mq_send(client_queues[client_id], msg, MAX_MSG_SIZE, LIST);
 
-    free(msg_buffer);
+    free(msg);
 }
 
 void send_to_one(int client_id, char *message)
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    msg_buffer->client_id = client_id;
-    msg_buffer->mtype = TO_ONE;
-    strcpy(msg_buffer->mtext, message);
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %s", TO_ONE, message);
 
-    mq_send(client_queues[client_id], (char *)msg_buffer, MAX_MSG_SIZE, TO_ONE);
-
-    free(msg_buffer);
+    mq_send(client_queues[client_id], msg, MAX_MSG_SIZE, TO_ONE);
 }
 
 void send_to_all(int sender_id, char *message)
 {
-    MsgBuffer *msg_buffer = malloc(sizeof(MsgBuffer));
-    msg_buffer->mtype = TO_ALL;
-    strcpy(msg_buffer->mtext, message);
+    char msg[MAX_MSG_SIZE];
+    sprintf(msg, "%d %s", TO_ALL, message);
 
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
@@ -184,10 +184,6 @@ void send_to_all(int sender_id, char *message)
         {
             continue;
         }
-
-        msg_buffer->client_id = i;
-        mq_send(client_queues[i], (char *)msg_buffer, MAX_MSG_SIZE, TO_ALL);
+        mq_send(client_queues[i], msg, MAX_MSG_SIZE, TO_ALL);
     }
-
-    free(msg_buffer);
 }
