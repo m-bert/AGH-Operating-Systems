@@ -202,9 +202,10 @@ void check_incoming_messages()
     struct msqid_ds *q_buffer = malloc(sizeof(struct msqid_ds));
     msgctl(client_queue_id, IPC_STAT, q_buffer);
 
-    if (q_buffer->msg_qnum > 0)
+    while (q_buffer->msg_qnum > 0)
     {
         handle_server_response();
+        msgctl(client_queue_id, IPC_STAT, q_buffer);
     }
 
     free(q_buffer);

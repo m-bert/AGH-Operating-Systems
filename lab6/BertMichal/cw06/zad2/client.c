@@ -195,9 +195,10 @@ void check_incoming_messages()
     struct mq_attr *mq_attributes = malloc(sizeof(struct mq_attr));
     mq_getattr(client_queue_descriptor, mq_attributes);
 
-    if (mq_attributes->mq_curmsgs > 0)
+    while (mq_attributes->mq_curmsgs > 0)
     {
         handle_server_response();
+        mq_getattr(client_queue_descriptor, mq_attributes);
     }
 
     free(mq_attributes);
