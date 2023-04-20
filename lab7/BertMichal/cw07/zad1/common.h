@@ -42,6 +42,10 @@ int get_haircut_time()
     return haircuts[rand() % HAIRCUTS_NO];
 }
 
+//============================================================================
+// Array functions
+//============================================================================
+
 int find_index(int *arr, int size)
 {
     for (int i = 0; i < size; i++)
@@ -62,6 +66,10 @@ void init_array(int *arr, int size)
         arr[i] = -1;
     }
 }
+
+//============================================================================
+// Semaphores functions
+//============================================================================
 
 void increment_sem(int sem_id, int sem_num)
 {
