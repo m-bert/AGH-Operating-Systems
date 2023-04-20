@@ -9,6 +9,8 @@ int semaphores_id;
 
 bool spawning = true;
 
+void validate_parameters(int argc, char *argv[]);
+
 void create_shm();
 void remove_shm();
 
@@ -19,15 +21,16 @@ void stop_program();
 
 int main(int argc, char *argv[])
 {
+    validate_parameters(argc, argv);
     srand(time(NULL));
 
     struct sigaction action;
     action.sa_handler = &stop_program;
     sigaction(SIGINT, &action, NULL);
 
-    hairdressers_no = 3;
-    chairs_no = 2;
-    waiting_room_seats = 5;
+    hairdressers_no = atoi(argv[1]);
+    chairs_no = atoi(argv[2]);
+    waiting_room_seats = atoi(argv[3]);
 
     create_shm();
     create_sem();
@@ -42,13 +45,14 @@ int main(int argc, char *argv[])
             break;
 
         case 0: // Child
-
+            printf("[%d] Enters\n", getpid());
             // Check if there is a free chair in waiting room
             decrement_sem(semaphores_id, WAITING_SEM, NO_WAIT);
 
             // No more space in waiting room, client leaves
             if (errno == EAGAIN)
             {
+                printf("[%d] leaves - no room\n", getpid());
                 exit(0);
             }
 
@@ -60,6 +64,7 @@ int main(int argc, char *argv[])
 
             // Wait for hairdresser
             decrement_sem(semaphores_id, HAIRDRESSER_SEM, WAIT);
+            printf("[%d] found hairdresser\n", client_id);
 
             // Hairdresser found
             int hairdresser_id = find_index(hairdressers_sm, hairdressers_no);
@@ -67,10 +72,12 @@ int main(int argc, char *argv[])
 
             // Wait for free chair to get haircut
             decrement_sem(semaphores_id, CHAIRS_SEM, WAIT);
+            printf("[%d] found chair\n", client_id);
 
             // Free seat in waiting room
             increment_sem(semaphores_id, WAITING_SEM);
             waiting_sm[waiting_id] = -1;
+            printf("[%d] Freeing waiting seat\n", client_id);
 
             // Getting haircut
             int chair_id = find_index(chairs_sm, chairs_no);
@@ -82,14 +89,16 @@ int main(int argc, char *argv[])
             // Free chair and hairdresser
             increment_sem(semaphores_id, CHAIRS_SEM);
             chairs_sm[chair_id] = -1;
+            printf("[%d] Freeing chair\n", client_id);
 
             increment_sem(semaphores_id, HAIRDRESSER_SEM);
             hairdressers_sm[hairdresser_id] = -1;
+            printf("[%d] Freeing hairdresser\n", client_id);
 
-            break;
+            exit(0);
 
         default: // Parent
-            sleep(5);
+            sleep(2);
             break;
         }
     }
@@ -98,6 +107,31 @@ int main(int argc, char *argv[])
     remove_shm();
 
     return 0;
+}
+
+void validate_parameters(int argc, char *argv[])
+{
+    if (argc < 4)
+    {
+        printf("Too few parameters\n");
+        exit(-1);
+    }
+
+    int hd_no = atoi(argv[1]);
+    int ch_no = atoi(argv[2]);
+    int wrs_no = atoi(argv[3]);
+
+    if (hd_no <= 0 || wrs_no <= 0 || ch_no <= 0)
+    {
+        printf("Arguments cannot be less than or equal to 0\n");
+        exit(-1);
+    }
+
+    if (hd_no < ch_no)
+    {
+        printf("Hairdressers number must be greather than or equal to chairs number\n");
+        exit(-1);
+    }
 }
 
 void create_shm()
