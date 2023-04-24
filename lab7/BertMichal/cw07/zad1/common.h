@@ -35,7 +35,7 @@
 
 #define HAIRCUTS_NO 4
 
-const int haircuts[] = {2, 3, 5, 10};
+const int haircuts[] = {5, 7, 8, 10};
 
 int get_haircut_time()
 {
