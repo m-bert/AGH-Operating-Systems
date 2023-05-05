@@ -5,7 +5,7 @@ typedef struct f_args
 {
     int *rows;
     int *cols;
-    int size;
+    int max_cells_no;
 
     char **foreground;
     char **background;

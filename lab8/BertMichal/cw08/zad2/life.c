@@ -9,11 +9,12 @@
 #include <pthread.h>
 #include <signal.h>
 
-void init_array(int *array, int size);
+int *create_empty_array(int size);
 void init_cells(int *rows, int *cols, int threads_amount, int starting_index);
 
 int main(int argc, char *argv[])
 {
+	// Data validation
 	if (argc < 2)
 	{
 		printf("Too few arguments!\n");
@@ -21,16 +22,25 @@ int main(int argc, char *argv[])
 	}
 
 	int threads_amount = atoi(argv[1]);
-	if (threads_amount > MAX_CELLS)
+
+	if (threads_amount <= 0)
+	{
+		printf("Number of threads must be positive!\n");
+		exit(-1);
+	}
+	else if (threads_amount > MAX_CELLS)
 	{
 		threads_amount = MAX_CELLS;
 	}
 
-	int max_cells_per_thread = MAX_CELLS / threads_amount + 1;
-
+	// Init
 	srand(time(NULL));
 	setlocale(LC_CTYPE, "");
 	initscr(); // Start curses mode
+
+	struct sigaction action;
+	action.sa_handler = empty_handler;
+	sigaction(SIGUSR1, &action, NULL);
 
 	char *foreground = create_grid();
 	char *background = create_grid();
@@ -38,18 +48,17 @@ int main(int argc, char *argv[])
 
 	init_grid(foreground);
 
+	int max_cells_per_thread = MAX_CELLS / threads_amount + 1;
+
 	pthread_t *threads = calloc(threads_amount, sizeof(pthread_t));
 	f_args **args = malloc(threads_amount * sizeof(f_args *));
 
 	for (int i = 0; i < threads_amount; ++i)
 	{
 		args[i] = malloc(sizeof(f_args));
-		args[i]->rows = calloc(max_cells_per_thread, sizeof(int));
-		args[i]->cols = calloc(max_cells_per_thread, sizeof(int));
-		args[i]->size = max_cells_per_thread;
-
-		init_array(args[i]->rows, max_cells_per_thread);
-		init_array(args[i]->cols, max_cells_per_thread);
+		args[i]->rows = create_empty_array(max_cells_per_thread);
+		args[i]->cols = create_empty_array(max_cells_per_thread);
+		args[i]->max_cells_no = max_cells_per_thread;
 
 		init_cells(args[i]->rows, args[i]->cols, threads_amount, i);
 
@@ -94,12 +103,16 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void init_array(int *array, int size)
+int *create_empty_array(int size)
 {
+	int *array = malloc(size * sizeof(int));
+
 	for (int i = 0; i < size; ++i)
 	{
 		array[i] = -1;
 	}
+
+	return array;
 }
 
 void init_cells(int *rows, int *cols, int threads_amount, int starting_index)
