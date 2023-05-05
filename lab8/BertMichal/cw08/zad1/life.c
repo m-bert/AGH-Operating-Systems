@@ -17,6 +17,7 @@ int main()
 
 	struct sigaction action;
 	action.sa_handler = empty_handler;
+	action.sa_flags = 0;
 	sigaction(SIGUSR1, &action, NULL);
 
 	char *foreground = create_grid();
@@ -58,8 +59,6 @@ int main()
 	destroy_grid(foreground);
 	destroy_grid(background);
 
-	free(tmp);
-
 	for (int i = 0; i < MAX_CELLS; ++i)
 	{
 		free(args[i]);
@@ -67,6 +66,7 @@ int main()
 
 	free(args);
 	free(threads);
+	free(tmp);
 
 	return 0;
 }
