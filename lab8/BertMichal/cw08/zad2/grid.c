@@ -57,8 +57,6 @@ void *is_alive(void *arg)
 
     while (true)
     {
-        pause();
-
         foreground = *args->foreground;
         background = *args->background;
 
@@ -89,11 +87,11 @@ void *is_alive(void *arg)
                         continue;
                     }
 
-                    printf("Into counting\n");
+                    // printf("Into counting\n");
 
                     if (foreground[GRID_WIDTH * r + c])
                     {
-                        printf("INCEREMENT\n");
+                        // printf("INCEREMENT\n");
                         count++;
                     }
                 }
@@ -108,8 +106,10 @@ void *is_alive(void *arg)
                 background[row * GRID_WIDTH + col] = count == 3;
             }
 
-            printf("%dx%d=%d\n", row, col, count);
+            // printf("%dx%d=%d\n", row, col, count);
         }
+
+        pause();
     }
 
     return NULL;

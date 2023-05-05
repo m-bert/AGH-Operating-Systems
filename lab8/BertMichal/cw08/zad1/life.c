@@ -15,22 +15,28 @@ int main()
 	setlocale(LC_CTYPE, "");
 	initscr(); // Start curses mode
 
+	struct sigaction action;
+	action.sa_handler = empty_handler;
+	sigaction(SIGUSR1, &action, NULL);
+
 	char *foreground = create_grid();
 	char *background = create_grid();
 	char *tmp;
 
 	init_grid(foreground);
 
-	pthread_t *threads = calloc(GRID_WIDTH * GRID_HEIGHT, sizeof(pthread_t));
-	for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i)
-	{
-		struct f_args *args = malloc(sizeof(args));
-		args->row = i / GRID_WIDTH;
-		args->col = i % GRID_WIDTH;
-		args->foreground = &foreground;
-		args->background = &background;
+	pthread_t *threads = calloc(MAX_CELLS, sizeof(pthread_t));
+	f_args **args = malloc(MAX_CELLS * sizeof(f_args *));
 
-		pthread_create(&threads[i], NULL, is_alive, args);
+	for (int i = 0; i < MAX_CELLS; ++i)
+	{
+		args[i] = malloc(sizeof(f_args));
+		args[i]->row = i / GRID_WIDTH;
+		args[i]->col = i % GRID_WIDTH;
+		args[i]->foreground = &foreground;
+		args[i]->background = &background;
+
+		pthread_create(&threads[i], NULL, is_alive, args[i]);
 	}
 
 	while (true)
@@ -38,9 +44,7 @@ int main()
 		draw_grid(foreground);
 		usleep(500 * 1000);
 
-		// Step simulation
-		// update_grid(foreground, background);
-		for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i)
+		for (int i = 0; i < MAX_CELLS; ++i)
 		{
 			pthread_kill(threads[i], SIGUSR1);
 		}
@@ -53,6 +57,16 @@ int main()
 	endwin(); // End curses mode
 	destroy_grid(foreground);
 	destroy_grid(background);
+
+	free(tmp);
+
+	for (int i = 0; i < MAX_CELLS; ++i)
+	{
+		free(args[i]);
+	}
+
+	free(args);
+	free(threads);
 
 	return 0;
 }

@@ -79,6 +79,18 @@ int main(int argc, char *argv[])
 	destroy_grid(foreground);
 	destroy_grid(background);
 
+	free(tmp);
+
+	for (int i = 0; i < MAX_CELLS; ++i)
+	{
+		free(args[i]->rows);
+		free(args[i]->cols);
+		free(args[i]);
+	}
+
+	free(args);
+	free(threads);
+
 	return 0;
 }
 

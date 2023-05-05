@@ -47,9 +47,6 @@ void init_grid(char *grid)
 
 void *is_alive(void *arg)
 {
-    struct sigaction action;
-    action.sa_handler = empty_handler;
-    sigaction(SIGUSR1, &action, NULL);
 
     f_args *args = (f_args *)arg;
     char *foreground = *args->foreground;
