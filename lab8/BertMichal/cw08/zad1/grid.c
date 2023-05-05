@@ -52,13 +52,15 @@ void *is_alive(void *arg)
     sigaction(SIGUSR1, &action, NULL);
 
     f_args *args = (f_args *)arg;
-
-    char *background = *args->background;
     char *foreground = *args->foreground;
+    char *background = *args->background;
 
     while (true)
     {
         pause();
+
+        foreground = *args->foreground;
+        background = *args->background;
 
         int count = 0;
         for (int i = -1; i <= 1; i++)
@@ -75,20 +77,20 @@ void *is_alive(void *arg)
                 {
                     continue;
                 }
-                if (args->foreground[GRID_WIDTH * r + c])
+                if (foreground[GRID_WIDTH * r + c])
                 {
                     count++;
                 }
             }
         }
 
-        if (args->foreground[args->row * GRID_WIDTH + args->col])
+        if (foreground[args->row * GRID_WIDTH + args->col])
         {
-            args->background[args->row * GRID_WIDTH + args->col] = (count == 2 || count == 3);
+            background[args->row * GRID_WIDTH + args->col] = (count == 2 || count == 3);
         }
         else
         {
-            args->background[args->row * GRID_WIDTH + args->col] = count == 3;
+            background[args->row * GRID_WIDTH + args->col] = count == 3;
         }
     }
 
