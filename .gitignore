@@ -2,3 +2,4 @@
 *.o
 *.a
 *tar*
+lab8/life-game/*
