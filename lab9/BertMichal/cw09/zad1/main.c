@@ -1,7 +1,7 @@
 #include "config.h"
 
 int waiting_reindeers = 0;
-int waiting_elves = 0;
+int waiting_elves = 0, waiting_elves_ids[MAX_WATING_ELVES] = {-1, -1, -1};
 int delivered_gifts = 0;
 
 pthread_mutex_t event_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -64,7 +64,7 @@ void *santa_routine()
         if (waiting_elves == 3)
         {
             printf("Mikołaj: Budzę się\n");
-            printf("Mikołaj: rozwiązuję problemy elfów\n");
+            printf("Mikołaj: rozwiązuję problemy elfów %d, %d, %d\n", waiting_elves_ids[0], waiting_elves_ids[1], waiting_elves_ids[2]);
             solve_problems();
 
             waiting_elves = 0;
@@ -115,6 +115,8 @@ void *elf_routine()
         {
             printf("Elf: Czeka %d elfów na Mikołaja [%d]\n", waiting_elves, gettid());
         }
+
+        waiting_elves_ids[waiting_elves % MAX_WATING_ELVES] = gettid();
 
         ++waiting_elves;
 
