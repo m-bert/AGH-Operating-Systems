@@ -32,11 +32,18 @@ int main(int argc, char *argv[])
         pthread_create(&reindeers_threads[i], NULL, reindeer_routine, NULL);
     }
 
+    pthread_t *elves_threads = calloc(ELVES, sizeof(pthread_t));
+    for (int i = 0; i < ELVES; ++i)
+    {
+        pthread_create(&elves_threads[i], NULL, elf_routine, NULL);
+    }
+
     while (delivered_gifts < GIFTS_TO_DELIVER)
     {
     }
 
     free(reindeers_threads);
+    free(elves_threads);
 
     return 0;
 }
@@ -57,8 +64,11 @@ void *santa_routine()
         if (waiting_elves == 3)
         {
             printf("Mikołaj: Budzę się\n");
+            printf("Mikołaj: rozwiązuję problemy elfów\n");
             solve_problems();
+
             waiting_elves = 0;
+            pthread_cond_broadcast(&elves_cond);
         }
 
         if (waiting_reindeers == 9)
@@ -83,15 +93,15 @@ void *santa_routine()
 
 void *elf_routine()
 {
-    while (deliver_gifts < GIFTS_TO_DELIVER)
+    while (delivered_gifts < GIFTS_TO_DELIVER)
     {
         work();
 
         pthread_mutex_lock(&elves_mutex);
 
-        if (waiting_elves == MAX_WATING_ELVES)
+        if (waiting_elves >= MAX_WATING_ELVES)
         {
-            printf("Elf: Samodzielnie rozwiązuję swój problem [%d]", gettid());
+            printf("Elf: Samodzielnie rozwiązuję swój problem [%d]\n", gettid());
             pthread_mutex_unlock(&elves_mutex);
 
             continue;
@@ -99,14 +109,27 @@ void *elf_routine()
 
         if (waiting_elves == MAX_WATING_ELVES - 1)
         {
-            printf("Elf: Wybudzam Mikołaja [%d]", gettid());
-
-            while (waiting_elves > 0)
-            {
-                pthread_cond_wait(&elves_cond);
-            }
+            printf("Elf: Wybudzam Mikołaja [%d]\n", gettid());
         }
+        else
+        {
+            printf("Elf: Czeka %d elfów na Mikołaja [%d]\n", waiting_elves, gettid());
+        }
+
+        ++waiting_elves;
+
+        trigger_event();
+
+        while (waiting_elves > 0)
+        {
+            pthread_cond_wait(&elves_cond, &elves_mutex);
+            printf("Elf: Mikołaj rozwiązuje problem [%d]\n", gettid());
+        }
+
+        pthread_mutex_unlock(&elves_mutex);
     }
+
+    return NULL;
 }
 
 void *reindeer_routine()
