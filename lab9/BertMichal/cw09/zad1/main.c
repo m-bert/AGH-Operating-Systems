@@ -21,7 +21,7 @@ void *reindeer_routine();
 
 int main(int argc, char *argv[])
 {
-    srand(1234);
+    srand(time(NULL));
 
     pthread_t santa_thread;
     pthread_create(&santa_thread, NULL, santa_routine, NULL);
@@ -67,6 +67,7 @@ void *santa_routine()
             printf("Mikołaj: rozwiązuję problemy elfów %d, %d, %d\n", waiting_elves_ids[0], waiting_elves_ids[1], waiting_elves_ids[2]);
             solve_problems();
 
+            // Don't lock mutex so that elves can solve problems on their own
             waiting_elves = 0;
             pthread_cond_broadcast(&elves_cond);
         }
@@ -113,7 +114,7 @@ void *elf_routine()
         }
         else
         {
-            printf("Elf: Czeka %d elfów na Mikołaja [%d]\n", waiting_elves, gettid());
+            printf("Elf: Czeka %d elfów na Mikołaja [%d]\n", waiting_elves + 1, gettid());
         }
 
         waiting_elves_ids[waiting_elves % MAX_WATING_ELVES] = gettid();
@@ -147,7 +148,7 @@ void *reindeer_routine()
         }
         else
         {
-            printf("Renifer: Czeka %d reniferów na Mikołaja [%d]\n", waiting_reindeers, gettid());
+            printf("Renifer: Czeka %d reniferów na Mikołaja [%d]\n", waiting_reindeers + 1, gettid());
         }
 
         ++waiting_reindeers;
