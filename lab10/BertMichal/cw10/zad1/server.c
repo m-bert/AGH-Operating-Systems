@@ -17,6 +17,8 @@ Event_Data *web_event_data, *unix_event_data;
 bool running = true;
 pthread_t connection_thread, ping_thread;
 
+FILE *log_file;
+
 int find_client_index();
 
 void *connections_handler();
@@ -34,6 +36,8 @@ void remove_client(int client_fd);
 void list_users(int client_fd);
 void send_to_one(char *nick, char *message);
 void send_to_all(char *message);
+
+void perform_log(char *message);
 
 int main(int argc, char *argv[])
 {
@@ -66,6 +70,8 @@ int main(int argc, char *argv[])
     struct sigaction action;
     action.sa_handler = &handle_stop;
     sigaction(SIGINT, &action, NULL);
+
+    log_file = fopen("log.txt", "w");
 
     pthread_join(connection_thread, NULL);
     pthread_join(ping_thread, NULL);
@@ -237,6 +243,8 @@ void handle_stop()
     close(WEB_SOCKET_FD);
     close(UNIX_SOCKET_FD);
 
+    fclose(log_file);
+
     exit(0);
 }
 
@@ -285,6 +293,8 @@ void *connections_handler()
                 {
                     continue;
                 }
+
+                perform_log(msg);
 
                 char *command = strtok(msg, DELIMITER);
 
@@ -379,4 +389,21 @@ void *ping()
     }
 
     return NULL;
+}
+
+void perform_log(char *message)
+{
+    char log[2 * MAX_MSG];
+    char date[64];
+
+    time_t rawtime;
+    time(&rawtime);
+
+    struct tm *timeinfo = localtime(&rawtime);
+
+    sprintf(date, "%s", asctime(timeinfo));
+    date[strlen(date) - 1] = '\0'; // Remove \n
+
+    sprintf(log, "[%s] %s\n", date, message);
+    fwrite(log, sizeof(char), strlen(log), log_file);
 }
