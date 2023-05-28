@@ -22,6 +22,7 @@
 
 const char *FULL = "FULL";
 const char *CONNECTED = "CONNECTED";
+const char *SERVER_STOPPED = "[SERVER_STOPPED]";
 
 const char *INIT = "INIT";
 const char *TO_ALL = "2ALL";

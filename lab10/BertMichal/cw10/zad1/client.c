@@ -167,6 +167,11 @@ void *read_messages()
                 char msg[MAX_MSG] = "";
                 recv(event_data->socket_fd, (char *)msg, MAX_MSG, 0);
 
+                if (strcmp(msg, SERVER_STOPPED))
+                {
+                    handle_stop();
+                }
+
                 if (strlen(msg) > 0)
                 {
                     printf("%s\n", msg);

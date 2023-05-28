@@ -12,11 +12,16 @@ typedef struct Client
 char *UNIX_PATH;
 int PORT, WEB_SOCKET_FD, UNIX_SOCKET_FD, EPOLL_FD;
 Client *clients[MAX_CLIENTS];
+Event_Data *web_event_data, *unix_event_data;
+bool running = true;
+pthread_t connection_thread, ping_thread;
 
 int find_client_index();
 
 void *connections_handler();
 void *ping();
+
+void handle_stop();
 
 void init_web_socket();
 void init_unix_socket();
@@ -50,9 +55,12 @@ int main(int argc, char *argv[])
         clients[i]->socket_id = -1;
     }
 
-    pthread_t connection_thread, ping_thread;
     pthread_create(&connection_thread, NULL, connections_handler, NULL);
     pthread_create(&ping_thread, NULL, ping, NULL);
+
+    struct sigaction action;
+    action.sa_handler = &handle_stop;
+    sigaction(SIGINT, &action, NULL);
 
     pthread_join(connection_thread, NULL);
     pthread_join(ping_thread, NULL);
@@ -95,6 +103,7 @@ void remove_client(int client_fd)
         {
             clients[i]->nick = "";
             clients[i]->socket_id = -1;
+            free(clients[i]->event_data);
 
             close(client_fd);
 
@@ -157,10 +166,10 @@ void init_web_socket()
     event.events = EPOLLIN | EPOLLPRI;
     event.data.fd = WEB_SOCKET_FD;
 
-    Event_Data *event_data = calloc(1, sizeof(Event_Data));
-    event_data->event_type = SOCKET;
-    event_data->socket_fd = WEB_SOCKET_FD;
-    event.data.ptr = event_data;
+    web_event_data = calloc(1, sizeof(Event_Data));
+    web_event_data->event_type = SOCKET;
+    web_event_data->socket_fd = WEB_SOCKET_FD;
+    event.data.ptr = web_event_data;
 
     epoll_ctl(EPOLL_FD, EPOLL_CTL_ADD, WEB_SOCKET_FD, &event);
 }
@@ -181,19 +190,43 @@ void init_unix_socket()
     event.events = EPOLLIN | EPOLLPRI;
     event.data.fd = UNIX_SOCKET_FD;
 
-    Event_Data *event_data = calloc(1, sizeof(Event_Data));
-    event_data->event_type = SOCKET;
-    event_data->socket_fd = UNIX_SOCKET_FD;
-    event.data.ptr = event_data;
+    unix_event_data = calloc(1, sizeof(Event_Data));
+    unix_event_data->event_type = SOCKET;
+    unix_event_data->socket_fd = UNIX_SOCKET_FD;
+    event.data.ptr = unix_event_data;
 
     epoll_ctl(EPOLL_FD, EPOLL_CTL_ADD, UNIX_SOCKET_FD, &event);
+}
+
+void handle_stop()
+{
+    running = false;
+    pthread_join(connection_thread, NULL);
+
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (clients[i]->socket_id != -1)
+        {
+            send(clients[i]->socket_id, SERVER_STOPPED, strlen(SERVER_STOPPED), 0);
+            free(clients[i]->event_data);
+            close(clients[i]->socket_id);
+        }
+    }
+
+    free(web_event_data);
+    free(unix_event_data);
+
+    close(WEB_SOCKET_FD);
+    close(UNIX_SOCKET_FD);
+
+    exit(0);
 }
 
 void *connections_handler()
 {
     struct epoll_event events[MAX_CLIENTS];
 
-    while (true)
+    while (running)
     {
         int read_amount = epoll_wait(EPOLL_FD, events, MAX_CLIENTS, -1);
 
@@ -296,5 +329,9 @@ void *connections_handler()
 
 void *ping()
 {
+    for (int i = 0; i < MAX_CLIENTS; ++i)
+    {
+    }
+
     return NULL;
 }
