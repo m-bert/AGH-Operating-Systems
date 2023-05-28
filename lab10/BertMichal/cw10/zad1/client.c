@@ -99,13 +99,13 @@ int main(int argc, char *argv[])
 
         send(SOCKET_FD, (char *)line_buffer, strlen(line_buffer), 0);
 
-        char *tmp = strtok(line_buffer, DELIMITER);
+        // char *tmp = strtok(line_buffer, DELIMITER);
 
-        if (strcmp(tmp, STOP) == 0)
-        {
-            running = false;
-            break;
-        }
+        // if (strcmp(tmp, STOP) == 0)
+        // {
+        //     running = false;
+        //     break;
+        // }
     }
 
     pthread_join(read_thread, NULL);
@@ -117,6 +117,7 @@ void init_socket()
     if (connection_type == WEB)
     {
         SOCKET_FD = socket(AF_INET, SOCK_STREAM, 0);
+        perror("SOCKET_FD");
 
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
@@ -124,6 +125,7 @@ void init_socket()
         inet_pton(AF_INET, server_ip, &addr.sin_addr);
 
         connect(SOCKET_FD, (struct sockaddr *)&addr, sizeof(addr));
+        perror("CONNECT");
     }
     else
     {
@@ -167,7 +169,7 @@ void *read_messages()
                 char msg[MAX_MSG] = "";
                 recv(event_data->socket_fd, (char *)msg, MAX_MSG, 0);
 
-                if (strcmp(msg, SERVER_STOPPED))
+                if (strcmp(msg, SERVER_STOPPED) == 0)
                 {
                     handle_stop();
                 }

@@ -7,6 +7,7 @@ typedef struct Client
     char *nick;
     int socket_id;
     Event_Data *event_data;
+    bool active;
 } Client;
 
 char *UNIX_PATH;
@@ -26,7 +27,7 @@ void handle_stop();
 void init_web_socket();
 void init_unix_socket();
 
-int add_client(char *nick, int client_fd);
+bool add_client(char *nick, int client_fd);
 void remove_client(int client_fd);
 void list_users(int client_fd);
 void send_to_one(char *nick, char *message);
@@ -81,18 +82,30 @@ int find_client_index()
     return -1;
 }
 
-int add_client(char *nick, int client_fd)
+bool add_client(char *nick, int client_fd)
 {
     int new_client_id;
     if ((new_client_id = find_client_index()) < 0)
     {
-        return -1;
+        return false;
     }
 
     clients[new_client_id]->nick = nick;
     clients[new_client_id]->socket_id = client_fd;
+    clients[new_client_id]->active = true;
 
-    return new_client_id;
+    struct epoll_event event;
+    event.events = EPOLLIN | EPOLLPRI;
+    event.data.fd = client_fd;
+
+    clients[new_client_id]->event_data = calloc(1, sizeof(Event_Data));
+    clients[new_client_id]->event_data->event_type = CLIENT;
+    clients[new_client_id]->event_data->socket_fd = client_fd;
+    event.data.ptr = clients[new_client_id]->event_data;
+
+    epoll_ctl(EPOLL_FD, EPOLL_CTL_ADD, client_fd, &event);
+
+    return true;
 }
 
 void remove_client(int client_fd)
@@ -246,9 +259,7 @@ void *connections_handler()
                 char *nick = calloc(MAX_NICK, sizeof(char));
                 recv(client_fd, (char *)nick, sizeof(nick), 0);
 
-                int new_client_id;
-
-                if ((new_client_id = add_client(nick, client_fd)) < 0)
+                if (!add_client(nick, client_fd))
                 {
                     send(client_fd, FULL, strlen(FULL), 0);
                     close(client_fd);
@@ -258,16 +269,7 @@ void *connections_handler()
 
                 send(client_fd, CONNECTED, strlen(CONNECTED), 0);
 
-                struct epoll_event event;
-                event.events = EPOLLIN | EPOLLPRI;
-                event.data.fd = client_fd;
-
-                clients[new_client_id]->event_data = calloc(1, sizeof(Event_Data));
-                clients[new_client_id]->event_data->event_type = CLIENT;
-                clients[new_client_id]->event_data->socket_fd = client_fd;
-                event.data.ptr = clients[new_client_id]->event_data;
-
-                epoll_ctl(EPOLL_FD, EPOLL_CTL_ADD, client_fd, &event);
+                free(nick);
             }
             else if (event_data->event_type == CLIENT)
             {
@@ -320,6 +322,8 @@ void *connections_handler()
 
                     send_to_one(other_nick, message);
                 }
+
+                free(msg);
             }
         }
     }
