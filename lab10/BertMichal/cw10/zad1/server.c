@@ -22,6 +22,8 @@ int find_client_index();
 void *connections_handler();
 void *ping();
 
+void refresh_user(int client_fd);
+
 void handle_stop();
 
 void init_web_socket();
@@ -54,6 +56,8 @@ int main(int argc, char *argv[])
         clients[i] = calloc(1, sizeof(Client));
         clients[i]->nick = "";
         clients[i]->socket_id = -1;
+        clients[i]->active = false;
+        clients[i]->event_data = NULL;
     }
 
     pthread_create(&connection_thread, NULL, connections_handler, NULL);
@@ -116,6 +120,7 @@ void remove_client(int client_fd)
         {
             clients[i]->nick = "";
             clients[i]->socket_id = -1;
+            clients[i]->active = false;
             free(clients[i]->event_data);
 
             close(client_fd);
@@ -283,6 +288,11 @@ void *connections_handler()
 
                 char *command = strtok(msg, DELIMITER);
 
+                if (strcmp(command, PING) == 0)
+                {
+                    refresh_user(event_data->socket_fd);
+                }
+
                 if (strcmp(command, LIST) == 0)
                 {
                     list_users(event_data->socket_fd);
@@ -331,10 +341,41 @@ void *connections_handler()
     return NULL;
 }
 
-void *ping()
+void refresh_user(int client_fd)
 {
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
+        if (clients[i]->socket_id == client_fd)
+        {
+            clients[i]->active = true;
+            return;
+        }
+    }
+}
+
+void *ping()
+{
+    while (running)
+    {
+        for (int i = 0; i < MAX_CLIENTS; ++i)
+        {
+            if (clients[i]->socket_id == -1)
+            {
+                continue;
+            }
+
+            clients[i]->active = false;
+
+            send(clients[i]->socket_id, PING, strlen(PING), 0);
+
+            sleep(PING_TIMEOUT);
+
+            if (!clients[i]->active)
+            {
+                send(clients[i]->socket_id, CLIENT_REMOVED, strlen(CLIENT_REMOVED), 0);
+                remove_client(clients[i]->socket_id);
+            }
+        }
     }
 
     return NULL;

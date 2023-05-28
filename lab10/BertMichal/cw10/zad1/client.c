@@ -22,6 +22,7 @@ bool running = true;
 void init_socket();
 
 void handle_stop();
+void force_stop();
 void *read_messages();
 
 int main(int argc, char *argv[])
@@ -99,13 +100,13 @@ int main(int argc, char *argv[])
 
         send(SOCKET_FD, (char *)line_buffer, strlen(line_buffer), 0);
 
-        // char *tmp = strtok(line_buffer, DELIMITER);
+        char *tmp = strtok(line_buffer, DELIMITER);
 
-        // if (strcmp(tmp, STOP) == 0)
-        // {
-        //     running = false;
-        //     break;
-        // }
+        if (strcmp(tmp, STOP) == 0)
+        {
+            running = false;
+            break;
+        }
     }
 
     pthread_join(read_thread, NULL);
@@ -174,6 +175,22 @@ void *read_messages()
                     handle_stop();
                 }
 
+                if (strcmp(msg, CLIENT_REMOVED) == 0)
+                {
+                    force_stop();
+                }
+
+                if (strcmp(msg, CLIENT_REMOVED) == 0)
+                {
+                    force_stop();
+                }
+
+                if (strcmp(msg, PING) == 0 || strcmp(msg, CONNECTED) == 0)
+                {
+                    send(SOCKET_FD, PING, strlen(PING), 0);
+                    continue;
+                }
+
                 if (strlen(msg) > 0)
                 {
                     printf("%s\n", msg);
@@ -196,5 +213,12 @@ void handle_stop()
     send(SOCKET_FD, STOP, strlen(STOP), 0);
     pthread_join(read_thread, NULL);
 
+    exit(0);
+}
+
+void force_stop()
+{
+    running = false;
+    pthread_join(read_thread, NULL);
     exit(0);
 }

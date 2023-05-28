@@ -18,11 +18,13 @@
 #define MAX_NICK 32
 #define MAX_PATH 128
 #define LINE_BUFFER_LENGTH 256
+#define PING_TIMEOUT 3
 #define DELIMITER " \n"
 
 const char *FULL = "FULL";
 const char *CONNECTED = "CONNECTED";
 const char *SERVER_STOPPED = "[SERVER_STOPPED]";
+const char *CLIENT_REMOVED = "[CLIENT_REMOVED]";
 
 const char *INIT = "INIT";
 const char *TO_ALL = "2ALL";
