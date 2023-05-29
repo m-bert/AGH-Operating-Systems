@@ -118,7 +118,6 @@ void init_socket()
     if (connection_type == WEB)
     {
         SOCKET_FD = socket(AF_INET, SOCK_STREAM, 0);
-        perror("SOCKET_FD");
 
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
@@ -126,7 +125,6 @@ void init_socket()
         inet_pton(AF_INET, server_ip, &addr.sin_addr);
 
         connect(SOCKET_FD, (struct sockaddr *)&addr, sizeof(addr));
-        perror("CONNECT");
     }
     else
     {
@@ -198,8 +196,6 @@ void *read_messages()
             }
         }
     }
-
-    send(SOCKET_FD, STOP, strlen(STOP), 0);
 
     free(event_data);
     close(SOCKET_FD);

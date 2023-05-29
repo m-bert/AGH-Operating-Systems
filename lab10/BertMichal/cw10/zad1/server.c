@@ -39,7 +39,7 @@ void list_users(int client_fd);
 void send_to_one(char *nick, char *message);
 void send_to_all(char *message);
 
-void perform_log(char *message);
+void perform_log(int client_fd, char *message);
 
 int main(int argc, char *argv[])
 {
@@ -164,7 +164,7 @@ void send_to_one(char *nick, char *message)
 {
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
-        if (strcmp(nick, clients[i]->nick) == 0)
+        if (clients[i]->socket_id != -1 && strcmp(nick, clients[i]->nick) == 0)
         {
             send(clients[i]->socket_id, message, strlen(message), 0);
         }
@@ -231,7 +231,11 @@ void init_unix_socket()
 void handle_stop()
 {
     running = false;
+
     pthread_join(connection_thread, NULL);
+    printf("Connection thread\n");
+    pthread_join(ping_thread, NULL);
+    printf("Connection ping\n");
 
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
@@ -239,6 +243,7 @@ void handle_stop()
         {
             send(clients[i]->socket_id, SERVER_STOPPED, strlen(SERVER_STOPPED), 0);
             free(clients[i]->event_data);
+            free(clients[i]->nick);
             close(clients[i]->socket_id);
         }
     }
@@ -246,8 +251,13 @@ void handle_stop()
     free(web_event_data);
     free(unix_event_data);
 
+    shutdown(WEB_SOCKET_FD, SHUT_RDWR);
+    shutdown(UNIX_SOCKET_FD, SHUT_RDWR);
+
     close(WEB_SOCKET_FD);
     close(UNIX_SOCKET_FD);
+
+    remove(UNIX_PATH);
 
     fclose(log_file);
 
@@ -260,7 +270,7 @@ void *connections_handler()
 
     while (running)
     {
-        int read_amount = epoll_wait(EPOLL_FD, events, MAX_CLIENTS, -1);
+        int read_amount = epoll_wait(EPOLL_FD, events, MAX_CLIENTS, 10);
 
         for (int i = 0; i < read_amount; ++i)
         {
@@ -302,7 +312,7 @@ void *connections_handler()
                     continue;
                 }
 
-                perform_log(msg);
+                perform_log(event_data->socket_fd, msg);
 
                 char *command = strtok(msg, DELIMITER);
 
@@ -358,6 +368,9 @@ void *connections_handler()
         }
     }
 
+    close(WEB_SOCKET_FD);
+    close(UNIX_SOCKET_FD);
+
     return NULL;
 }
 
@@ -401,10 +414,13 @@ void *ping()
         }
     }
 
+    close(WEB_SOCKET_FD);
+    close(UNIX_SOCKET_FD);
+
     return NULL;
 }
 
-void perform_log(char *message)
+void perform_log(int client_fd, char *message)
 {
     char log[2 * MAX_MSG];
     char date[64];
@@ -417,6 +433,6 @@ void perform_log(char *message)
     sprintf(date, "%s", asctime(timeinfo));
     date[strlen(date) - 1] = '\0'; // Remove \n
 
-    sprintf(log, "[%s] %s\n", date, message);
+    sprintf(log, "[%s] [FD: %d] %s\n", date, client_fd, message);
     fwrite(log, sizeof(char), strlen(log), log_file);
 }
