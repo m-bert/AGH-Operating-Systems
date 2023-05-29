@@ -15,7 +15,9 @@ int PORT, WEB_SOCKET_FD, UNIX_SOCKET_FD, EPOLL_FD;
 Client *clients[MAX_CLIENTS];
 Event_Data *web_event_data, *unix_event_data;
 bool running = true;
+
 pthread_t connection_thread, ping_thread;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 FILE *log_file;
 
@@ -58,7 +60,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
         clients[i] = calloc(1, sizeof(Client));
-        clients[i]->nick = "";
+        // clients[i]->nick = calloc(MAX_NICK, sizeof(char));
         clients[i]->socket_id = -1;
         clients[i]->active = false;
         clients[i]->event_data = NULL;
@@ -100,7 +102,9 @@ bool add_client(char *nick, int client_fd)
         return false;
     }
 
-    clients[new_client_id]->nick = nick;
+    // clients[new_client_id]->nick = nick;
+    clients[new_client_id]->nick = calloc(MAX_NICK, sizeof(char));
+    strcpy(clients[new_client_id]->nick, nick);
     clients[new_client_id]->socket_id = client_fd;
     clients[new_client_id]->active = true;
 
@@ -124,23 +128,23 @@ void remove_client(int client_fd)
     {
         if (clients[i]->socket_id == client_fd)
         {
-            clients[i]->nick = "";
+            free(clients[i]->nick);
             clients[i]->socket_id = -1;
             clients[i]->active = false;
             free(clients[i]->event_data);
 
             close(client_fd);
-
             return;
         }
     }
-
     return;
 }
 
 void list_users(int client_fd)
 {
     char active_users[512] = "";
+
+    printf("LISTING\n");
 
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
@@ -150,6 +154,8 @@ void list_users(int client_fd)
             strcat(active_users, " ");
         }
     }
+
+    printf("%s\n", active_users);
 
     send(client_fd, active_users, strlen(active_users), 0);
 }
@@ -270,7 +276,7 @@ void *connections_handler()
                 }
 
                 char *nick = calloc(MAX_NICK, sizeof(char));
-                recv(client_fd, (char *)nick, sizeof(nick), 0);
+                recv(client_fd, (char *)nick, MAX_NICK, 0);
 
                 if (!add_client(nick, client_fd))
                 {
@@ -288,6 +294,8 @@ void *connections_handler()
             {
                 char *msg = calloc(MAX_MSG, sizeof(char));
                 recv(event_data->socket_fd, (char *)msg, MAX_MSG, 0);
+
+                printf("GOT: [%d] %s\n", event_data->socket_fd, msg);
 
                 if (strlen(msg) == 0)
                 {
@@ -310,7 +318,9 @@ void *connections_handler()
 
                 if (strcmp(command, STOP) == 0)
                 {
+                    pthread_mutex_lock(&mutex);
                     remove_client(event_data->socket_fd);
+                    pthread_mutex_unlock(&mutex);
                 }
 
                 if (strcmp(command, TO_ALL) == 0)
@@ -380,10 +390,13 @@ void *ping()
 
             sleep(PING_TIMEOUT);
 
-            if (!clients[i]->active)
+            if (!clients[i]->active && clients[i]->socket_id != -1)
             {
                 send(clients[i]->socket_id, CLIENT_REMOVED, strlen(CLIENT_REMOVED), 0);
+
+                pthread_mutex_lock(&mutex);
                 remove_client(clients[i]->socket_id);
+                pthread_mutex_unlock(&mutex);
             }
         }
     }
