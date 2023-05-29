@@ -184,17 +184,35 @@ void init_web_socket()
 {
     WEB_SOCKET_FD = socket(AF_INET, SOCK_STREAM, 0);
 
+    if (WEB_SOCKET_FD == -1)
+    {
+        printf("Couldn't open socket\n");
+        exit(0);
+    }
+
     struct sockaddr_in web_address;
     web_address.sin_family = AF_INET;
     web_address.sin_port = htons(PORT);
     web_address.sin_addr.s_addr = INADDR_ANY;
 
     int reuse = 1;
-    setsockopt(WEB_SOCKET_FD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    if (setsockopt(WEB_SOCKET_FD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1)
+    {
+        printf("Couldn't set reuse option\n");
+        exit(0);
+    }
 
-    bind(WEB_SOCKET_FD, (struct sockaddr *)&web_address, sizeof(web_address));
+    if (bind(WEB_SOCKET_FD, (struct sockaddr *)&web_address, sizeof(web_address)) == -1)
+    {
+        printf("Couldn't bind socket");
+        exit(0);
+    }
 
-    listen(WEB_SOCKET_FD, MAX_CLIENTS);
+    if (listen(WEB_SOCKET_FD, MAX_CLIENTS) == -1)
+    {
+        printf("Failed to listen\n");
+        exit(0);
+    }
 
     struct epoll_event event;
     event.events = EPOLLIN | EPOLLPRI;
@@ -211,14 +229,27 @@ void init_web_socket()
 void init_unix_socket()
 {
     UNIX_SOCKET_FD = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (UNIX_SOCKET_FD == -1)
+    {
+        printf("Couldn't open socket\n");
+        exit(0);
+    }
 
     struct sockaddr_un unix_address;
     unix_address.sun_family = AF_UNIX;
     strcpy(unix_address.sun_path, UNIX_PATH);
 
-    bind(UNIX_SOCKET_FD, (struct sockaddr *)&unix_address, sizeof(unix_address));
+    if (bind(UNIX_SOCKET_FD, (struct sockaddr *)&unix_address, sizeof(unix_address)) == -1)
+    {
+        printf("Couldn't bind socket");
+        exit(0);
+    }
 
-    listen(UNIX_SOCKET_FD, MAX_CLIENTS);
+    if (listen(UNIX_SOCKET_FD, MAX_CLIENTS) == -1)
+    {
+        printf("Failed to listen\n");
+        exit(0);
+    }
 
     struct epoll_event event;
     event.events = EPOLLIN | EPOLLPRI;

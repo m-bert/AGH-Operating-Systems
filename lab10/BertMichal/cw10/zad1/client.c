@@ -118,23 +118,41 @@ void init_socket()
     if (connection_type == WEB)
     {
         SOCKET_FD = socket(AF_INET, SOCK_STREAM, 0);
+        if (SOCKET_FD == -1)
+        {
+            printf("Failed to open socket\n");
+            exit(0);
+        }
 
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port = htons(PORT);
         inet_pton(AF_INET, server_ip, &addr.sin_addr);
 
-        connect(SOCKET_FD, (struct sockaddr *)&addr, sizeof(addr));
+        if (connect(SOCKET_FD, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+        {
+            printf("Failed to connect\n");
+            exit(0);
+        }
     }
     else
     {
         SOCKET_FD = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (SOCKET_FD == -1)
+        {
+            printf("Failed to open socket\n");
+            exit(0);
+        }
 
         struct sockaddr_un addr;
         addr.sun_family = AF_UNIX;
         strcpy(addr.sun_path, UNIX_PATH);
 
-        connect(SOCKET_FD, (struct sockaddr *)&addr, sizeof(addr));
+        if (connect(SOCKET_FD, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+        {
+            printf("Failed to connect\n");
+            exit(0);
+        }
     }
 
     EPOLL_FD = epoll_create1(0);
