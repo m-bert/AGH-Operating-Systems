@@ -267,7 +267,9 @@ void handle_stop()
 {
     running = false;
 
+    printf("\nWaiting for connection thread...\n");
     pthread_join(connection_thread, NULL);
+    printf("Waiting for ping thread...\n");
     pthread_join(ping_thread, NULL);
 
     for (int i = 0; i < MAX_CLIENTS; i++)

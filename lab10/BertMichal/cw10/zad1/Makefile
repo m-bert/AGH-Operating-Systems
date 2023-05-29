@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g -fsanitize=address
+CFLAGS = -Wall
 
 all:
 	@make -s clean
