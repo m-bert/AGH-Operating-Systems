@@ -198,6 +198,7 @@ void *read_messages()
     }
 
     free(event_data);
+    shutdown(SOCKET_FD, SHUT_RDWR);
     close(SOCKET_FD);
 
     return NULL;

@@ -133,6 +133,7 @@ void remove_client(int client_fd)
             clients[i]->active = false;
             free(clients[i]->event_data);
 
+            shutdown(client_fd, SHUT_RDWR);
             close(client_fd);
             return;
         }
@@ -188,6 +189,9 @@ void init_web_socket()
     web_address.sin_port = htons(PORT);
     web_address.sin_addr.s_addr = INADDR_ANY;
 
+    int reuse = 1;
+    setsockopt(WEB_SOCKET_FD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
     bind(WEB_SOCKET_FD, (struct sockaddr *)&web_address, sizeof(web_address));
 
     listen(WEB_SOCKET_FD, MAX_CLIENTS);
@@ -233,9 +237,7 @@ void handle_stop()
     running = false;
 
     pthread_join(connection_thread, NULL);
-    printf("Connection thread\n");
     pthread_join(ping_thread, NULL);
-    printf("Connection ping\n");
 
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
@@ -248,9 +250,6 @@ void handle_stop()
         }
     }
 
-    free(web_event_data);
-    free(unix_event_data);
-
     shutdown(WEB_SOCKET_FD, SHUT_RDWR);
     shutdown(UNIX_SOCKET_FD, SHUT_RDWR);
 
@@ -258,6 +257,9 @@ void handle_stop()
     close(UNIX_SOCKET_FD);
 
     remove(UNIX_PATH);
+
+    free(web_event_data);
+    free(unix_event_data);
 
     fclose(log_file);
 
@@ -368,9 +370,6 @@ void *connections_handler()
         }
     }
 
-    close(WEB_SOCKET_FD);
-    close(UNIX_SOCKET_FD);
-
     return NULL;
 }
 
@@ -413,9 +412,6 @@ void *ping()
             }
         }
     }
-
-    close(WEB_SOCKET_FD);
-    close(UNIX_SOCKET_FD);
 
     return NULL;
 }
